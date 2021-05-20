@@ -10,7 +10,8 @@ import glob
 from tqdm import tqdm
 
 START_BOUNDING_BOX_ID = 1
-PRE_DEFINE_CATEGORIES = {"echinus": 1, "scallop": 2, "starfish": 3, "holothurian": 4,"waterweeds":5 }
+# 预定义类别名称和编号
+PRE_DEFINE_CATEGORIES = {"echinus": 1, "scallop": 2, "starfish": 3, "holothurian": 4, "waterweeds": 5}
 
 
 # If necessary, pre-define category and its id
@@ -82,7 +83,7 @@ def convert(xml_dir, csv_path, json_file):
 
         print("Number of xml files: {}".format(len(xml_files)))
     else:
-        xml_files=[os.path.join(xml_dir,file)  for file in os.listdir(xml_dir)]
+        xml_files = [os.path.join(xml_dir, file) for file in os.listdir(xml_dir)]
 
     start_ind = 1
     json_dict = {"images": [], "type": "instances", "annotations": [], "categories": []}
@@ -163,15 +164,21 @@ def convert(xml_dir, csv_path, json_file):
 
 
 if __name__ == "__main__":
-    "convert xml files to coco json format, from csv list  created by pandas "
+    """
+    根据pandas创建的csv文件内的xml文件名，将这些xml转成coco格式的数据，
+    需要传入xml文件的存储路径和csv文件的路径
+    如果csv_dir是一个文件夹，那说明里面有好几个csv文件都需要做这些的处理
+    start_ind 是image_id 的起始 编号
+    """
+
     import argparse
 
     parser = argparse.ArgumentParser(
         description="Convert Pascal VOC annotation to COCO format."
     )
     parser.add_argument("xml_dir", help="Directory path to xml files.", type=str)
-    parser.add_argument("--csv_dir", help="Path to csv directory.", type=str,default=None)
-    # parser.add_argument("json_file", help="Output COCO format json file.", type=str)
+    parser.add_argument("--csv_dir", help="Path to csv directory.", type=str, default=None)
+
     args = parser.parse_args()
 
     # If you want to do train/test split, you can pass a subset of xml files to convert function.
@@ -180,7 +187,7 @@ if __name__ == "__main__":
 
     elif os.path.isdir(args.csv_dir):
         csv_files = os.listdir(args.csv_dir)
-        csv_files=list(filter(lambda x:x.endswith(".csv"),csv_files))
+        csv_files = list(filter(lambda x: x.endswith(".csv"), csv_files))
         csv_files = [os.path.join(args.csv_dir, csv) for csv in csv_files]
 
     elif os.path.isfile(args.csv_dir):
@@ -189,19 +196,19 @@ if __name__ == "__main__":
     else:
         raise ValueError
 
-    if  csv_files:
+    if csv_files:
 
         for csv_path in csv_files:
 
             json_file = csv_path.replace(".csv", ".json")
 
             if os.path.exists(json_file):
-                print('file already exist in %s'%json_file)
+                print('file already exist in %s' % json_file)
                 raise ValueError
 
             convert(args.xml_dir, csv_path, json_file)
     else:
-        json_file=os.path.join(os.path.dirname(args.xml_dir),"voc2coco.json")
+        json_file = os.path.join(os.path.dirname(args.xml_dir), "voc2coco.json")
         if os.path.exists(json_file):
             raise ValueError
         convert(args.xml_dir, csv_files, json_file)
