@@ -3,9 +3,25 @@ import json
 from tqdm import tqdm
 import argparse
 
+"""
+只需要传入标准的coco格式文件路径和保存YOLO的txt文件路径即可，后者会自动创建
+yolo的数据存放格式：
+train(训练集下的文件目录结构):
+    images
+        -image1
+        -image2
+    labels
+        -x1.txt
+        -x2.txt
+        
+"""
 parser = argparse.ArgumentParser()
-parser.add_argument('--json_path', default='/home/data1/yw/mmdetection/data/water_detection/split_folds/fold_v2/test.json', type=str, help="input: coco format(json)")
-parser.add_argument('--save_path', default='/home/data1/yw/mmdetection/data/water_detection/split_folds/fold_v2/yolo_train/val/labels', type=str, help="specify where to save the output dir of labels")
+parser.add_argument('--json_path',
+                    default='/home/data1/yw/mmdetection/data/water_detection/split_folds/fold_v2/test.json', type=str,
+                    help="input: coco format(json)")
+parser.add_argument('--save_path',
+                    default='/home/data1/yw/mmdetection/data/water_detection/split_folds/fold_v2/yolo_train/val/labels',
+                    type=str, help="specify where to save the output dir of labels")
 arg = parser.parse_args()
 
 
@@ -25,8 +41,8 @@ def convert(size, box):
 
 
 if __name__ == '__main__':
-    json_file = arg.json_path  # COCO Object Instance ÀàÐÍµÄ±ê×¢
-    ana_txt_save_path = arg.save_path  # ±£´æµÄÂ·¾¶
+    json_file = arg.json_path
+    ana_txt_save_path = arg.save_path
 
     data = json.load(open(json_file, 'r'))
     if not os.path.exists(ana_txt_save_path):
