@@ -5,7 +5,7 @@ import torch
 
 
 class ResNet(nn.Module):
-    # todo 根据官方实现，里面的卷积操作都改为 bias=False，据说是为了训练的更快。
+    # 根据官方实现，里面的卷积操作都改为 bias=False，后面接了BN，所以bias变得多余了。
     # todo 没有把conv_block 和identity_block分开写，
     def __init__(self, num_class):
         self.num_class = num_class
