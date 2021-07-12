@@ -1,8 +1,13 @@
-import os
+import os, sys
+
+file_path = os.path.abspath(__file__)
+sys.path.append(os.path.abspath(os.path.join(file_path, "..", "..")))
+
 import pandas as pd
 from tqdm import tqdm
 import numpy as np
 from matplotlib import pyplot as plt
+from code_aculat.visualize.plot_tools import plot_points
 
 
 def get_xmls_name_from_csv(csv_file_path):
@@ -17,7 +22,7 @@ def get_xmls_name_from_csv(csv_file_path):
     return xml_list
 
 
-def visual_image_wh(xml_dir, xmls=None):
+def visual_image_wh(xml_dir, xmls=None, plot_type='points'):
     """
     本身会传入从csv处相关的xml名称信息,没有则 os.listdir
     :param xml_dir:
@@ -33,9 +38,8 @@ def visual_image_wh(xml_dir, xmls=None):
     if not xmls:
         xmls = os.listdir(xml_dir)
 
-    width_list = []
-    height_list = []
-    width_height = []
+    height_width = []
+    hxw = []
 
     for xml in tqdm(xmls):
         xml_path = os.path.join(xml_dir, xml)
@@ -47,31 +51,48 @@ def visual_image_wh(xml_dir, xmls=None):
             if '<size>' in p:
                 rectangle = [round(eval(next(fp).split('>')[1].split('<')[0])) for _ in range(2)]
 
-                width_list.append(rectangle[0])
-                height_list.append(rectangle[1])
-                width_height.append("%s*%s" % (rectangle[0], rectangle[1]))
+                height_width.append([rectangle[1], rectangle[0]])
+                hxw.append("%s*%s" % (rectangle[0], rectangle[1]))
 
         fp.close()
 
-    for key in [width_list, height_list, width_height]:
-        "分别展示三张图：宽、高、宽*高"
-        unique_ratio = set(key)
-        unique_ratio = sorted(unique_ratio)
-        bbox_unique_count = [key.count(i) for i in unique_ratio]
+    height_width = np.array(height_width)
+    if plot_type == "histogram":
+        for key in [list(height_width[:, 1]), list(height_width[:, 0]), hxw]:
+            "分别展示三张图：宽、高、宽*高"
+            unique_values = list(set(key))
+            unique_count = [key.count(i) for i in unique_values]
 
-        wh_dataframe = pd.DataFrame(bbox_unique_count, index=unique_ratio, columns=["wh"])
-        wh_dataframe.plot(kind='bar', color="#55aacc")
-        plt.show()
+            value2count = np.array([unique_values, unique_count])
+            value2count = value2count.transpose([1, 0])
+
+            index_big2low = np.argsort(value2count[:, 1])[::-1]
+            index_big2low = index_big2low[:15]
+            saved_value2count = value2count[index_big2low]
+
+            saved_value2count = saved_value2count[np.argsort(saved_value2count[:, 0])]
+
+            wh_dataframe = pd.DataFrame(np.array(saved_value2count[:, 1], dtype=np.uint8),
+                                        index=saved_value2count[:, 0], columns=["w,h,w*h"])
+            wh_dataframe.plot(kind='bar', color="#55aacc")
+            plt.show()
+
+    elif plot_type == "points":  # 宽为x的散点图
+        plot_points([(height_width[:, 1], height_width[:, 0])], 'x2width')
 
 
-def analyse_image_wh(xml_dir, csv_path):
+def analyse_image_wh(xml_dir, csv_path, plot_type):
     "csv_path 对应多个文件时，说明这些csv文件里记录的xml文件名都要纳入分析范围"
     xml_list = []
     if len(csv_path) > 1:
         for csv in csv_path:
             _xml_list = get_xmls_name_from_csv(csv)
             xml_list.extend(_xml_list)
-    visual_image_wh(xml_dir, xml_list)
+    else:
+        xml_list = os.listdir(xml_dir)
+
+    if len(xml_list) > 0:
+        visual_image_wh(xml_dir, xml_list, plot_type)
 
 
 def analyse_obs_per_image(names_resource, xml_dir=None):

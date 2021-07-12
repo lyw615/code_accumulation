@@ -8,7 +8,7 @@ from tqdm import tqdm
 import numpy as np
 import pandas as pd
 
-sys.path.append("/home/data1/yw/kaggle-global-wheat-detection/iterative-stratification")
+sys.path.append("/home/data1/yw/competetion_tools/iterative-stratification")
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 
 # class_name_dict={"holothurian":0 ,"echinus": 1,"scallop": 2,"starfish": 3,"waterweeds": 4,}
@@ -297,17 +297,17 @@ if __name__ == '__main__':
     # analyze_classes_proportition("/home/data1/yw/water_detection/train/Annotations")
 
     # split all dataset
-    # split_folds(r"/home/data1/yw/water_detection/split_folds",r"/home/data1/yw/water_detection/train/Annotations")
+    # split_folds(r"/home/data1/yw/mmdetection/data/water_detection/train_implmt/split_folds",r"/home/data1/yw/mmdetection/data/water_detection/train_implmt/Annotations")
 
     # split train val dataset
-    # split_train_val(r"/home/data1/yw/water_detection/split_folds/fold_v1")
+    split_train_val(r"/home/data1/yw/mmdetection/data/water_detection/train_implmt/split_folds/fold_v1")
     # check_class_balance()
     # check_class_balance_txt()
     # edit_csv()
     # example_for_iterstrat()
 
-    analyse_image_wh("/home/data1/yw/water_detection/train/Annotations",
-                     csv_path=["/home/data1/yw/water_detection/split_folds/fold_v1/train.csv",
-                               "/home/data1/yw/water_detection/split_folds/fold_v1/test.csv"])
+    # analyse_image_wh("/home/data1/yw/water_detection/train/Annotations",
+    #                  csv_path=["/home/data1/yw/water_detection/split_folds/fold_v1/train.csv",
+    #                            "/home/data1/yw/water_detection/split_folds/fold_v1/test.csv"])
 
     print("pk")
