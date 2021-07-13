@@ -1,2 +1,2 @@
 # code_accumulation
-Some useful codes or scripts for me
+用于目标检测比赛的工具，其中分析训练数据的内容包括：统计voc格式训练数据的图片宽高分布、label的宽高比、各类别对象的数量统计。还有voc、coco数据格式的互相转换
