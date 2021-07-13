@@ -66,11 +66,11 @@ def visual_image_wh(xml_dir, xmls=None, plot_type='points'):
             value2count = np.array([unique_values, unique_count])
             value2count = value2count.transpose([1, 0])
 
-            index_big2low = np.argsort(value2count[:, 1])[::-1]
-            index_big2low = index_big2low[:15]
+            index_big2low = np.argsort(value2count[:, 1])[::-1]  # 获取从小到大排序的索引，并将索引反序
+            index_big2low = index_big2low[:15]  # 显示太多容易放不下
             saved_value2count = value2count[index_big2low]
 
-            saved_value2count = saved_value2count[np.argsort(saved_value2count[:, 0])]
+            saved_value2count = saved_value2count[np.argsort(saved_value2count[:, 0])]  # 显示的时候x坐标升序
 
             wh_dataframe = pd.DataFrame(np.array(saved_value2count[:, 1], dtype=np.uint8),
                                         index=saved_value2count[:, 0], columns=["w,h,w*h"])
@@ -110,9 +110,9 @@ def analyse_obs_per_image(names_resource, xml_dir=None):
         names = os.listdir(names_resource)
         xml_dir = names_resource
 
-    obs_num = []
+    obs_dict = {}
     for _ in tqdm(names):
-        ob_num = 0
+
         xml_path = os.path.join(xml_dir, _)
 
         fp = open(xml_path)
@@ -120,22 +120,25 @@ def analyse_obs_per_image(names_resource, xml_dir=None):
         for p in fp:
             "这里object后面是类别的名称"
             if '<object>' in p:
-                _name = next(fp).split('>')[1].split('<')[0]
-                ob_num += 1
-        fp.close()
-        obs_num.append(ob_num)
+                ob_name = next(fp).split('>')[1].split('<')[0]
 
+                if ob_name not in obs_dict.keys():
+                    obs_dict[ob_name] = 0
+                obs_dict[ob_name] = obs_dict[ob_name] + 1
+        fp.close()
+
+    assert len(obs_dict) > 0, "xml文件里没有找到对象信息"
     "得到不重复的类别名称，并排序"
-    unique_value = set(obs_num)
-    unique_value = sorted(unique_value)
+    unique_name = list(obs_dict.keys())
 
     "得到每类对象的数量"
-    unique_count = [obs_num.count(i) for i in unique_value]
+    unique_count = list(obs_dict.values())
 
     "类别名称为x轴，对应的数量为y轴"
-    array_x = unique_value
+    array_x = unique_name
     array_y = unique_count
 
-    wh_dataframe = pd.DataFrame(array_y, index=array_x, columns=["obs num"])
-    wh_dataframe.plot(kind='bar', color="#55aacc")
+    wh_dataframe = pd.DataFrame(array_y, columns=["obs num"])  # 实际还是调的matplotlib可视化
+    ax = wh_dataframe.plot(kind='bar', color="#55aacc")
+    ax.set_xticklabels(array_x, rotation=0)
     plt.show()
