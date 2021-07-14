@@ -8,14 +8,14 @@ from code_aculat.visualize.visual_base import draw_bboxes_on_image
 import numpy as np
 
 
-def visualize_voc_xml(xml_source, image_dir, image_suffix='.tif'):
+def visualize_voc_xml(xml_source, image_dir, image_suffix='.tif', show_pro=0.7):
     assert os.path.isdir(xml_source) or os.path.isfile(xml_source), "please assign xml_source"
     if os.path.isdir(xml_source):
         xmls = os.listdir(xml_source)
         xmls = [os.path.join(xml_source, xml) for xml in xmls]
 
     for _ in range(len(xmls)):
-        if np.random.randint(1, 10) > 7:  # 1/3的概率会被可视化
+        if np.random.randint(1, 10) / 10 < show_pro:  # 1/3的概率会被可视化
 
             # 从xml获取类别名和bbox坐标
             class_names, rectangles = analyze_xml(xmls[_])

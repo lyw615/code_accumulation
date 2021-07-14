@@ -1,3 +1,5 @@
+import os
+
 from PIL import Image, ImageDraw
 import numpy as np
 
@@ -17,10 +19,13 @@ def show_two_image(image1, image2, title=None):
     plt.show()
 
 
-def show_one_image(image):
+def show_one_image(image, title=None):
     from matplotlib import pyplot as plt
     fig = plt.figure(figsize=(10, 10))
     plt.imshow(image)
+
+    if title:
+        plt.title(title)
     plt.show()
 
 
@@ -31,6 +36,9 @@ def draw_bboxes_on_image(image_path, bboxes, class_names):
     """
     show_img = Image.open(image_path)
     draw = ImageDraw.Draw(show_img)
+
+    title = os.path.basename(image_path)
+
     for _ in range(len(bboxes)):
         bbox = bboxes[_]
         class_name = class_names[_]
@@ -38,7 +46,7 @@ def draw_bboxes_on_image(image_path, bboxes, class_names):
         draw.rectangle([(bbox[0], bbox[1]), (bbox[2], bbox[3])], width=1)  # (xmin,ymin) ,(xmax,ymax)
         draw.text((int((bbox[0] + bbox[2]) / 2), bbox[3]), '%s' % class_name)
 
-    show_one_image(np.array(show_img))
+    show_one_image(np.array(show_img), title)
 
 
 def draw_bbox(image, bbox):
