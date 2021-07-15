@@ -99,6 +99,36 @@ def analyse_image_wh(xml_dir, csv_path, plot_type):
         visual_image_wh(xml_dir, xml_list, plot_type)
 
 
+def output_big_wh(xml_dir, size_thresh, xmls=None):
+    """
+    根据xml文件里的宽高，输出宽高大于阈值的xml文件
+    本身会传入从csv处相关的xml名称信息,没有则 os.listdir
+    :param xml_dir:
+    :param xmls:
+    :return:
+    """
+
+    if not xmls:
+        xmls = os.listdir(xml_dir)
+
+    big_wh = []
+
+    for xml in tqdm(xmls):
+        xml_path = os.path.join(xml_dir, xml)
+
+        fp = open(xml_path)
+
+        for p in fp:
+
+            if '<size>' in p:
+                size = [round(eval(next(fp).split('>')[1].split('<')[0])) for _ in range(2)]
+                width, height = size
+
+                if width > size_thresh or height > size_thresh:
+                    big_wh.append(os.path.basename(xml_path))
+    print("这些图片的宽高超出了限制，总数为%d \n"%len(big_wh), big_wh)
+
+
 def analyse_obs_per_image(names_resource, xml_dir=None):
     """
     分析数据集中图片里每类对象的数量情况，如果提供的names_resource是csv文件，
