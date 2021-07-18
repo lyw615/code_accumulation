@@ -7,8 +7,9 @@ from code_aculat.data_analyse.data_analyse import analyse_image_wh
 from code_aculat.visualize.visualize_voc_xml import visualize_voc_xml
 
 # analyse_image_wh(r"/home/data1/GeoAI_Data/compete_unzip/train/Annotations", [], plot_type='histogram')
-visualize_voc_xml(r"E:\push_branch\resources_ml\out\training\object_ext_train_data\Annotations",
-                  r"E:\push_branch\resources_ml\out\training\object_ext_train_data\Images",
+
+visualize_voc_xml(r"E:\push_branch\resources_ml\out\clip_xml\Annotations",
+                  r"E:\push_branch\resources_ml\out\clip_xml\Images",
                   image_suffix='.tif',
-                  show_pro=1
+                  show_pro=0.02
                   )

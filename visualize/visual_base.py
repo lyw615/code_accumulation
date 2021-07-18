@@ -29,15 +29,17 @@ def show_one_image(image, title=None):
     plt.show()
 
 
-def draw_bboxes_on_image(image_path, bboxes, class_names):
+def draw_bboxes_on_image(image_path, bboxes, class_names, title=None):
     """
     bbox:[[xmin,ymin,xmax,ymax]] list
 
     """
-    show_img = Image.open(image_path)
+    if isinstance(image_path, str):
+        show_img = Image.open(image_path)
+        title = os.path.basename(image_path)
+    else:
+        show_img = Image.fromarray(image_path)
     draw = ImageDraw.Draw(show_img)
-
-    title = os.path.basename(image_path)
 
     for _ in range(len(bboxes)):
         bbox = bboxes[_]

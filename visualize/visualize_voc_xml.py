@@ -15,7 +15,7 @@ def visualize_voc_xml(xml_source, image_dir, image_suffix='.tif', show_pro=0.7):
         xmls = [os.path.join(xml_source, xml) for xml in xmls]
 
     for _ in range(len(xmls)):
-        if np.random.randint(1, 10) / 10 < show_pro:  # 1/3的概率会被可视化
+        if np.random.randint(1, 1000) / 1000 < show_pro:  # 1/3的概率会被可视化
 
             # 从xml获取类别名和bbox坐标
             class_names, rectangles = analyze_xml(xmls[_])
