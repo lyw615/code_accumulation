@@ -11,7 +11,7 @@ from code_aculat.visualize.visualize_voc_xml import visualize_voc_xml
 visualize_voc_xml(r"/home/data1/GeoAI_Data/compete_unzip/train/Annotations",
                   r"/home/data1/GeoAI_Data/compete_unzip/train/TIFFImages",
                   image_suffix='.tif',
-                  show_pro=1
+                  show_pro=0.02
                   )
 
 # output_big_wh(r"/home/data1/GeoAI_Data/compete_unzip/train/Annotations",10000)

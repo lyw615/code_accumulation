@@ -1,4 +1,4 @@
-import os
+import os, platform
 
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
@@ -29,19 +29,22 @@ def show_one_image(image, title=None):
     plt.show()
 
 
-def draw_bboxes_on_image(image_path, bboxes, class_names):
+def draw_bboxes_on_image(image_path, bboxes, class_names, title=None):
     """
     bbox:[[xmin,ymin,xmax,ymax]] list
 
     """
-    import platform
-    try:
-        show_img = Image.open(image_path)
-    except:
-        return
-    draw = ImageDraw.Draw(show_img)
 
-    title = os.path.basename(image_path)
+    if isinstance(image_path, str):
+        try:
+            show_img = Image.open(image_path)
+            title = os.path.basename(image_path)
+        except:
+            return
+    else:
+        show_img = Image.fromarray(image_path)
+
+    draw = ImageDraw.Draw(show_img)
 
     for _ in range(len(bboxes)):
         bbox = bboxes[_]
