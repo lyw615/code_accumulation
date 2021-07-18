@@ -1,6 +1,7 @@
 import numpy as np
 
-def analyze_xml(file_name,check_bbox=False):
+
+def analyze_xml(file_name, check_bbox=False):
     '''
     从xml文件中解析class，对象位置
     :param file_name: xml文件位置
@@ -11,15 +12,17 @@ def analyze_xml(file_name,check_bbox=False):
     rectangle_position = []
     for p in fp:
         if '<object>' in p:
-            # print(next(fp))
-            class_name.append(next(fp).split('>')[1].split('<')[0])
+            bnbbox = next(fp)
+
+            name = next(fp).split('>')[1].split('<')[0]
+            class_name.append(name)
 
         elif '<bndbox>' in p:
             rectangle = []
             [rectangle.append(round(eval(next(fp).split('>')[1].split('<')[0]))) for _ in range(4)]
             rectangle_position.append(rectangle)
         elif '<size>' in p:
-                size = [round(eval(next(fp).split('>')[1].split('<')[0])) for _ in range(2)]
+            size = [round(eval(next(fp).split('>')[1].split('<')[0])) for _ in range(2)]
 
     fp.close()
     if check_bbox:
