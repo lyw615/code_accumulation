@@ -362,7 +362,7 @@ if __name__ == "__main__":
 
     sliceHeight = 128
     sliceWidth = 128
-    overlap = 30
+    overlap = 30    #最好设置为最大目标对象的1.2倍，被切断时至少能保留一边完整
     area_thresh = 0.7
 
     List_imgs = os.listdir(raw_images_dir)

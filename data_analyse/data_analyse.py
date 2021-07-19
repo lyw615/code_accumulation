@@ -127,6 +127,7 @@ def output_big_wh(xml_dir, size_thresh, xmls=None):
                 if width > size_thresh or height > size_thresh:
                     big_wh.append(os.path.basename(xml_path))
     print("这些图片的宽高超出了限制，总数为%d \n"%len(big_wh), big_wh)
+    return  big_wh
 
 
 def analyse_obs_per_image(names_resource, xml_dir=None):
