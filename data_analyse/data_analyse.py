@@ -126,8 +126,8 @@ def output_big_wh(xml_dir, size_thresh, xmls=None):
 
                 if width > size_thresh or height > size_thresh:
                     big_wh.append(os.path.basename(xml_path))
-    print("这些图片的宽高超出了限制，总数为%d \n"%len(big_wh), big_wh)
-    return  big_wh
+    print("这些图片的宽高超出了限制，总数为%d \n" % len(big_wh), big_wh)
+    return big_wh
 
 
 def analyse_obs_per_image(names_resource, xml_dir=None):
@@ -155,6 +155,7 @@ def analyse_obs_per_image(names_resource, xml_dir=None):
         for p in fp:
             "这里object后面是类别的名称"
             if '<object>' in p:
+                bndbox = next(fp)
                 ob_name = next(fp).split('>')[1].split('<')[0]
 
                 if ob_name not in obs_dict.keys():
@@ -181,7 +182,7 @@ def analyse_obs_per_image(names_resource, xml_dir=None):
 
 def analyse_obs_w2h_ratio(names_resource, xml_dir=None):
     """
-       分析数据集中所有对象的宽高比，如果提供的names_resource是csv文件，
+       分析数据集中所有对象的宽高 ,宽高比，如果提供的names_resource是csv文件，
        则同时需要提供xml文件夹路径，如果提供的是xml文件夹路径，那么赋给第一个参数就行
     """
     from collections import Counter
@@ -216,9 +217,12 @@ def analyse_obs_w2h_ratio(names_resource, xml_dir=None):
     rectangle_position = np.array(rectangle_position)
     rec_width = rectangle_position[:, 2] - rectangle_position[:, 0]
     rec_height = rectangle_position[:, 3] - rectangle_position[:, 1]
+
+    plot_points([(rec_width, rec_height)])  # 绘制宽高的散点图
+
     w2h_ratio = rec_width / rec_height
 
-    w2h_ratio = w2h_ratio.astype(np.int)
+    w2h_ratio = np.ceil(w2h_ratio)
     w2h_ratio = dict(Counter(w2h_ratio))  # 计算给ratio出现的频次
 
     values = np.array(list(w2h_ratio.values()))

@@ -16,7 +16,7 @@ def plot_points(point_list, label=None):
 
     if len(point_list) > 0:
         for point in point_list:
-            x1, y1 = point
+            x1, y1 = point  #width,height
             colors1 = '#00CED1'  # 点的颜色
             # colors2 = '#DC143C'  #如果再绘制一种点集，可以设置颜色同时绘制
             # area = np.pi * 4 ** 2  # 点面积

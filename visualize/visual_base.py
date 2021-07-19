@@ -2,6 +2,7 @@ import os, platform
 
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
+import cv2 as cv
 
 
 def show_two_image(image1, image2, title=None):
@@ -40,7 +41,9 @@ def draw_bboxes_on_image(image_path, bboxes, class_names, title=None):
             show_img = Image.open(image_path)
             title = os.path.basename(image_path)
         except:
-            return
+            show_img = cv.imdecode(np.fromfile(image_path, dtype=np.uint8), 1)
+            show_img = Image.fromarray(show_img)
+
     else:
         show_img = Image.fromarray(image_path)
 
