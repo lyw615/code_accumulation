@@ -1,6 +1,6 @@
-import os
+import os, platform
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 
 
@@ -34,19 +34,31 @@ def draw_bboxes_on_image(image_path, bboxes, class_names, title=None):
     bbox:[[xmin,ymin,xmax,ymax]] list
 
     """
+
     if isinstance(image_path, str):
-        show_img = Image.open(image_path)
-        title = os.path.basename(image_path)
+        try:
+            show_img = Image.open(image_path)
+            title = os.path.basename(image_path)
+        except:
+            return
     else:
         show_img = Image.fromarray(image_path)
+
     draw = ImageDraw.Draw(show_img)
 
     for _ in range(len(bboxes)):
         bbox = bboxes[_]
         class_name = class_names[_]
 
-        draw.rectangle([(bbox[0], bbox[1]), (bbox[2], bbox[3])], width=1)  # (xmin,ymin) ,(xmax,ymax)
-        draw.text((int((bbox[0] + bbox[2]) / 2), bbox[3]), '%s' % class_name)
+        draw.rectangle([(bbox[0], bbox[1]), (bbox[2], bbox[3])], width=4,
+                       outline='red')  # (xmin,ymin) ,(xmax,ymax)
+
+        if platform.system() == "Linux":
+            txt_font = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
+            txt_font = ImageFont.truetype(txt_font, size=70)
+            draw.text((int((bbox[0] + bbox[2]) / 2), bbox[3]), '%s' % class_name, font=txt_font)
+        else:
+            draw.text((int((bbox[0] + bbox[2]) / 2), bbox[3]), '%s' % class_name)
 
     show_one_image(np.array(show_img), title)
 
