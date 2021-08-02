@@ -2,17 +2,17 @@ import json, codecs, os
 from tqdm import tqdm
 import numpy as np
 
-# ±êÇ©Â·¾¶
-labelme_path = "/home/data1/competition/data/tianzhi2/CASIA-Ship/train/mask"  # Ô­Ê¼labelme±ê×¢Êý¾ÝÂ·¾¶
-saved_path = "/home/data1/competition/data/tianzhi2/CASIA-Ship/train/Annotations"  # ±£´æÂ·¾¶
+# 标签路径
+labelme_path = "/home/data1/competition/data/tianzhi2/CASIA-Ship/train/mask"  # 原始labelme标注数据路径
+saved_path = "/home/data1/competition/data/tianzhi2/CASIA-Ship/train/Annotations"  # 保存路径
 os.makedirs(saved_path, exist_ok=True)
 
-# »ñÈ¡´ý´¦ÀíÎÄ¼þ
+# 获取待处理文件
 files = os.listdir(labelme_path)
 files = list(filter(lambda x: x.endswith('json'), files))
 files = [i.split("/")[-1].split(".json")[0] for i in files]
 
-# ¶ÁÈ¡±ê×¢ÐÅÏ¢²¢Ð´Èë xml
+# 读取标注信息并写入 xml
 for json_file_ in tqdm(files):
     json_filename = os.path.join(labelme_path, json_file_ + ".json")
     json_file = json.load(open(json_filename, "r", encoding="utf-8"))
