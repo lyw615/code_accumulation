@@ -248,3 +248,87 @@ def analyse_obs_w2h_ratio(names_resource, xml_dir=None):
     ax = wh_dataframe.plot(kind='bar', color="#55aacc")
     ax.set_xticklabels(array_x, rotation=0)
     plt.show()
+
+
+def analyse_obs_scale(names_resource, xml_dir=None):
+    """
+       分析数据集中每类对象的宽高相对于其所在图片的scale，如果提供的names_resource是csv文件，
+       则同时需要提供xml文件夹路径，如果提供的是xml文件夹路径，那么赋给第一个参数就行
+    """
+    from collections import Counter
+    if os.path.isfile(names_resource):
+        "如果把xml文件名存在txt或者csv文件里"
+        with open(names_resource, 'r', encoding="utf-8") as f:
+            names = f.readlines()
+    elif os.path.isdir(names_resource):
+        "如果提供xml文件夹路径"
+        names = os.listdir(names_resource)
+        xml_dir = names_resource
+
+    wh_scale = []
+    for _ in tqdm(names):
+
+        xml_path = os.path.join(xml_dir, _)
+        fp = open(xml_path)
+
+        for p in fp:
+            if '<size>' in p:
+                width, height = [round(eval(next(fp).split('>')[1].split('<')[0])) for _ in range(2)]
+            if '<bndbox>' in p:
+                bbox = [(round(eval(next(fp).split('>')[1].split('<')[0]))) for _ in range(4)]
+                x = bbox[2] - bbox[0]
+                y = bbox[3] - bbox[1]
+                wh_scale.append([width // x, height // y])
+
+        fp.close()
+
+    assert len(wh_scale) > 0, "xml文件里没有找到对象信息"
+    wh_scale = np.array(wh_scale)
+    plot_points([(wh_scale[:, 0], wh_scale[:, 1])], label="w//x with h//y")
+
+
+def analyse_obs_wh(names_resource, xml_dir=None):
+    """
+       分析数据集中每类对象的宽高，如果提供的names_resource是csv文件，
+       则同时需要提供xml文件夹路径，如果提供的是xml文件夹路径，那么赋给第一个参数就行
+    """
+
+    if os.path.isfile(names_resource):
+        "如果把xml文件名存在txt或者csv文件里"
+        with open(names_resource, 'r', encoding="utf-8") as f:
+            names = f.readlines()
+    elif os.path.isdir(names_resource):
+        "如果提供xml文件夹路径"
+        names = os.listdir(names_resource)
+        xml_dir = names_resource
+
+    rectangle_position = []
+    rect_dict = {}
+    for _ in tqdm(names):
+
+        xml_path = os.path.join(xml_dir, _)
+        fp = open(xml_path)
+
+        for p in fp:
+            if '<object>' in p:
+                bnd_box = next(fp).split('>')[1].split('<')[0]
+                ob_name = next(fp).split('>')[1].split('<')[0]
+                if ob_name not in rect_dict.keys():
+                    rect_dict[ob_name] = []
+
+            if '<bndbox>' in p:
+                rectangle = []
+                [rectangle.append(round(eval(next(fp).split('>')[1].split('<')[0]))) for _ in range(4)]
+                if ob_name not in rect_dict.keys():
+                    rect_dict[ob_name] = []
+
+                rect_dict[ob_name].append(rectangle)
+
+        fp.close()
+
+    for key, value in rect_dict.items():
+        rectangle_position = np.array(value)
+        rec_width = rectangle_position[:, 2] - rectangle_position[:, 0]
+        rec_height = rectangle_position[:, 3] - rectangle_position[:, 1]
+
+        plot_points([(rec_width, rec_height)], label="%s_width_height" % key)
