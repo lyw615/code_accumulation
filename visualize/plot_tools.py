@@ -5,7 +5,7 @@ import numpy as np
 
 def plot_points(point_list, label=None):
     """
-    绘制散点图,  plot_points([(x1,y1),(x2,y2)])   or [[x1,y1],[x2,y2]]
+    绘制散点图, point_list  [ (x_array,y_array)]
     """
     plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['axes.unicode_minus'] = False
