@@ -12,6 +12,7 @@ from tqdm import tqdm
 START_BOUNDING_BOX_ID = 1
 # 预定义类别名称和编号
 PRE_DEFINE_CATEGORIES = {"echinus": 1, "scallop": 2, "starfish": 3, "holothurian": 4, "waterweeds": 5}
+PRE_DEFINE_CATEGORIES = {"Airport": 1, "Port": 2}
 
 
 # If necessary, pre-define category and its id
