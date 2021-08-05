@@ -110,8 +110,12 @@ def convert(xml_dir, csv_path, json_file):
         size = get_and_check(root, "size", 1)
         width = int(get_and_check(size, "width", 1).text)
         height = int(get_and_check(size, "height", 1).text)
+
+        if len(filename.split('.')) == 1:
+            filename += ".jpg"
+
         image = {
-            "file_name": filename + ".jpg",
+            "file_name": filename,
             "height": height,
             "width": width,
             "id": image_id,
