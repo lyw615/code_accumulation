@@ -53,6 +53,7 @@ for _t in test_imgs:
         keypoints_t, descriptors_t = sift.detectAndCompute(test_block, None)
 
     for _b in base_imgs:
+        match_right = False
         base_img_path = os.path.join(base_img_dir, _b)
 
         with rasterio.open(base_img_path) as ds_b:
@@ -105,6 +106,12 @@ for _t in test_imgs:
                                               start_h, start_w, base_tile_size
                                               ), )
                     plt.savefig(save_path)
+
+                    match_right = True
+                    break
+
+                if match_right:
+                    break
 
 end = time.time()
 
