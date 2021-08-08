@@ -181,8 +181,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Convert Pascal VOC annotation to COCO format."
     )
-    parser.add_argument("xml_dir", help="Directory path to xml files.", type=str)
-    parser.add_argument("--csv_dir", help="Path to csv directory.", type=str, default=None)
+
+    parser.add_argument("--xml_dir", help="Directory path to xml files.", type=str,
+                        default="/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/train/Annotations")
+    parser.add_argument("--csv_dir", help="Path to csv directory.", type=str, default="/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/k-fold/fold_v5")
 
     args = parser.parse_args()
 

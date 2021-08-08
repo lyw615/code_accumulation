@@ -81,3 +81,25 @@ def draw_bbox(image, bbox):
          (left, top)],
         width=4,
         fill='red')
+
+
+def draw_multi_bboxes(image, bboxes, color=None):
+    """
+    Draw one bounding box on image.
+    Args:
+        image (PIL.Image): a PIL Image object.
+        bbox (np.array|list|tuple): (xmin, ymin, xmax, ymax).
+    """
+    if not color:
+        color = ['red'] * len(bboxes)
+
+    for _ in range(len(bboxes)):
+        bbox = bboxes[_]
+        draw = ImageDraw.Draw(image)
+        xmin, ymin, xmax, ymax = bbox
+        (left, right, top, bottom) = (xmin, xmax, ymin, ymax)
+        draw.line(
+            [(left, top), (left, bottom), (right, bottom), (right, top),
+             (left, top)],
+            width=4,
+            fill=color[_])

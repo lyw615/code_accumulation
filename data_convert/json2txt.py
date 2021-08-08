@@ -56,7 +56,7 @@ def json2csv(json_path, test_json, format='mmdetection'):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--json_path',
-                        default='/home/data1/yw/data/iobjectspy_out/mmdetection/history_test_result/xf_result/xf_600_300.json.bbox.json')
+                        default='/home/data1/yw/data/iobjectspy_out/mmdetection/history_test_result/xf_result/xf_600_300_v4.bbox.json')
     parser.add_argument('--test_json_path',
                         default='/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/k-fold/fold_v1/test/test.json')
     parser.add_argument('--json_format', default="mmdetection")
