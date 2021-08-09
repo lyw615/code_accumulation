@@ -52,13 +52,25 @@ def json2csv(json_path, test_json, format='mmdetection'):
                     "%s  %f  %d %d %d %d" % (obs[-1], obs[-2], int(obs[0]), int(obs[1]), int(obs[2]), int(obs[3])))
                 txt.write('\n')
 
+    #
+    txt_result = os.listdir(out_dir)
+    image_num = 119
+    txt2img = ['%d.txt' % x for x in range(image_num)]
+    lack_txt = [x for x in txt2img if x not in txt_result]
+
+    print('lack txt  {}'.format(lack_txt))
+
+    for lc in lack_txt:
+        with open(os.path.join(out_dir, lc), 'w') as tt:
+            pass
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--json_path',
-                        default='/home/data1/yw/data/iobjectspy_out/mmdetection/history_test_result/xf_result/xf_600_300_v4.bbox.json')
+                        default='/home/data1/yw/data/iobjectspy_out/mmdetection/history_test_result/xf_result/xf_600_300_clean-f2.bbox.json')
     parser.add_argument('--test_json_path',
-                        default='/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/k-fold/fold_v1/test/test.json')
+                        default='/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/k-fold-v2/fold_v1/test/test.json')
     parser.add_argument('--json_format', default="mmdetection")
 
     arg = parser.parse_args()

@@ -285,4 +285,5 @@ if __name__ == '__main__':
 
     if len(image_name_pre_none) > 0:
         with open('./image_pre_none.txt', 'w', encoding='utf-8') as txt:
-            txt.writelines(image_name_pre_none)
+            for _ in image_name_pre_none:
+                txt.write(_ + "\n")
