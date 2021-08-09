@@ -34,20 +34,23 @@ def resample_raster(raster, scale=0.05):
 def det_comp(img_path, scale):
     "得到给定路径图片的关键点和描述子"
     with  rasterio.open(img_path) as ds_b:
-        raw_shape_b = (ds_b.height, ds_b.width)
+        raw_shape = (ds_b.height, ds_b.width)
         base_img = resample_raster(ds_b, scale=1 / scale)
         base_img_r = cv2.cvtColor(base_img, cv2.COLOR_BGR2GRAY)
 
-    keypoints_b, descriptors_b = sift.detectAndCompute(base_img_r, None)
+    keypoints, descriptors = sift.detectAndCompute(base_img_r, None)
 
-    return keypoints_b, descriptors_b, raw_shape_b, base_img_r
+    return keypoints, descriptors, raw_shape, base_img_r
 
 
 # test_img_path = r"E:\image_matching\test\布莱尔军港lit.tif"  # 这张图的driver可能不是GTIFF，导致速度很慢，所以这张图也是可以用rasterio缩放的
 # base_img_path = r"E:\image_matching\base\brier_port.tif"
 
-test_img_dir = r"D:\BaiduNetdiskDownload\基准影像&测试影像示例\测试影像"
-base_img_dir = r"D:\BaiduNetdiskDownload\基准影像&测试影像示例\基准影像"
+# test_img_dir = r"D:\BaiduNetdiskDownload\基准影像&测试影像示例\测试影像"
+# base_img_dir = r"D:\BaiduNetdiskDownload\基准影像&测试影像示例\基准影像"
+
+test_img_dir = r"E:\image_matching\test"
+base_img_dir = r"E:\image_matching\base"
 
 test_imgs = os.listdir(test_img_dir)
 test_imgs = list(filter(lambda x: x.endswith('tif'), test_imgs))
@@ -63,7 +66,7 @@ os.makedirs(out_txt_dir, exist_ok=True)
 os.makedirs(out_plot_dir, exist_ok=True)
 
 st = time.time()
-scale = 50
+scale = 50  # 原图缩放为原来的1/50
 
 # sift
 sift = cv2.SIFT_create()
@@ -72,12 +75,15 @@ bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 
 for name_t in test_imgs:
     test_img_path = os.path.join(test_img_dir, name_t)
+
     test_img = cv2.imdecode(np.fromfile(test_img_path, dtype=np.uint8), 0)  # todo 有的图用rasterio打开没有cv快，但大部分都比cv快
     raw_shape_t = test_img.shape
     test_img_r = cv2.resize(test_img, (test_img.shape[0] // scale, test_img.shape[1] // scale))
     # test_img_r = cv2.cvtColor(test_img_r, cv2.COLOR_BGR2GRAY)
 
     keypoints_t, descriptors_t = sift.detectAndCompute(test_img_r, None)
+
+    # keypoints_t, descriptors_t, raw_shape_t, test_img_r=det_comp(test_img_path,scale)
 
     min_points_dist = np.inf
     matched_base = None
