@@ -128,6 +128,8 @@ for _rela in rela_imgs:
         geo_right, geo_bot, _ = np.matmul(transform_metric, point_arr1)
         geo_left, geo_top, _ = np.matmul(transform_metric, point_arr2)
 
+        print("geo_right %f,geo_left %f,geo_bot %f,geo_top %f" % (geo_right, geo_left, geo_bot, geo_top))
+
         # TODO 是先把转换矩阵存入txt还是等bbox算出来之后再运行脚本得出目标的地理坐标，可以先存好，但是得把小数点后的位数精确好
 
         # #以此关键点作为测试影像在基础影像中的像素坐标的参考点
