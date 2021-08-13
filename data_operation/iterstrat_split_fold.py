@@ -11,9 +11,6 @@ import pandas as pd
 sys.path.append("/home/data1/yw/competetion_tools/iterative-stratification")
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 
-# class_name_dict={"holothurian":0 ,"echinus": 1,"scallop": 2,"starfish": 3,"waterweeds": 4,}
-class_name_dict = {"echinus": 1, "scallop": 2, "starfish": 3, "holothurian": 4, }
-
 
 def analyze_xml(file_name, max_col):
     '''
@@ -27,6 +24,7 @@ def analyze_xml(file_name, max_col):
     class_name = []
     for p in fp:
         if '<object>' in p:
+            bndbox = next(fp).split('>')[1].split('<')[0]  # 标准VOC会有这个字段
             name = next(fp).split('>')[1].split('<')[0]
             if name in class_name_dict.keys():
                 class_name.append(class_name_dict[name])
@@ -273,24 +271,32 @@ def edit_csv(csv_dir):
     os.remove(os.path.join(csv_dir, "test.csv"))
 
 
-def split_train_val(vfold_path):
-    train_val = os.path.join(vfold_path, "train.csv")
+def split_train_val(vfold_path, xml_dir, dirty_txt=None):
+    train_val = os.path.join(vfold_path, "train.csv")  # 把要处理的xml文件名写入csv
+    if os.path.exists(train_val):
+        with open(train_val, 'r') as f:
+            records = f.readlines()
+            records.pop(0)
 
-    with open(train_val, 'r') as f:
-        records = f.readlines()
-        records.pop(0)
+        target_xml_names = []
+        for cord in records:
+            target_xml_names.append(cord.strip("\n").split(',')[1] + '.xml')
+    else:
 
-    target_xml_names = []
-    for cord in records:
-        target_xml_names.append(cord.strip("\n").split(',')[1] + '.xml')
+        target_xml_names = os.listdir(xml_dir)
+        target_xml_names = list(filter(lambda x: x.endswith('xml'), target_xml_names))
 
-    split_folds(vfold_path, r"/home/data1/yw/water_detection/train/Annotations", target_xml_names)
+    if dirty_txt:  # there are dirty data in the given data, then filter them from txt
+        with open(dirty_txt, 'r') as dt:
+            dirty_list = dt.readlines()
+        dirty_list = [x.strip('\n').split('.')[0] + '.xml' for x in dirty_list]
+
+        target_xml_names = [x for x in target_xml_names if x not in dirty_list]
+
+    split_folds(vfold_path, xml_dir, target_xml_names)
 
     # edit_csv(os.path.join(vfold_path,"fold_v2"))
     # shutil.copy(train_val,os.path.join(vfold_path,"fold_v2","trainval.txt"))
-
-
-
 
 
 if __name__ == '__main__':
@@ -299,8 +305,15 @@ if __name__ == '__main__':
     # split all dataset
     # split_folds(r"/home/data1/yw/mmdetection/data/water_detection/train_implmt/split_folds",r"/home/data1/yw/mmdetection/data/water_detection/train_implmt/Annotations")
 
+    # class_name_dict={"holothurian":0 ,"echinus": 1,"scallop": 2,"starfish": 3,"waterweeds": 4,}
+    # class_name_dict = {"echinus": 1, "scallop": 2, "starfish": 3, "holothurian": 4, }
+    class_name_dict = {"Airport": 1, "Port": 2}
+
     # split train val dataset
-    split_train_val(r"/home/data1/yw/mmdetection/data/water_detection/train_implmt/split_folds/fold_v1")
+    xml_dir = r"/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/train/Annotations"
+    out_dir = r"/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/k-fold-v2"
+    dirty_txt = r"/home/data1/yw/github_projects/personal_github/code_aculat/data_operation/image_pre_none.txt"
+    split_train_val(out_dir, xml_dir, dirty_txt)
     # check_class_balance()
     # check_class_balance_txt()
     # edit_csv()
@@ -309,5 +322,3 @@ if __name__ == '__main__':
     # analyse_image_wh("/home/data1/yw/water_detection/train/Annotations",
     #                  csv_path=["/home/data1/yw/water_detection/split_folds/fold_v1/train.csv",
     #                            "/home/data1/yw/water_detection/split_folds/fold_v1/test.csv"])
-
-    print("pk")

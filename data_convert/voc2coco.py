@@ -12,6 +12,7 @@ from tqdm import tqdm
 START_BOUNDING_BOX_ID = 1
 # 预定义类别名称和编号
 PRE_DEFINE_CATEGORIES = {"echinus": 1, "scallop": 2, "starfish": 3, "holothurian": 4, "waterweeds": 5}
+PRE_DEFINE_CATEGORIES = {"Airport": 1, "Port": 2}
 
 
 # If necessary, pre-define category and its id
@@ -109,8 +110,12 @@ def convert(xml_dir, csv_path, json_file):
         size = get_and_check(root, "size", 1)
         width = int(get_and_check(size, "width", 1).text)
         height = int(get_and_check(size, "height", 1).text)
+
+        if len(filename.split('.')) == 1:
+            filename += ".jpg"
+
         image = {
-            "file_name": filename + ".jpg",
+            "file_name": filename,
             "height": height,
             "width": width,
             "id": image_id,
@@ -176,8 +181,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Convert Pascal VOC annotation to COCO format."
     )
-    parser.add_argument("xml_dir", help="Directory path to xml files.", type=str)
-    parser.add_argument("--csv_dir", help="Path to csv directory.", type=str, default=None)
+
+    parser.add_argument("--xml_dir", help="Directory path to xml files.", type=str,
+                        default="/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/train/Annotations")
+    parser.add_argument("--csv_dir", help="Path to csv directory.", type=str,
+                        default="/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/k-fold-v2/fold_v5")
 
     args = parser.parse_args()
 
