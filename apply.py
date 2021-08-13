@@ -10,21 +10,21 @@ from code_aculat.visualize.visualize_voc_xml import visualize_voc_xml,visual_lar
 # analyse_image_wh(r"/home/data1/GeoAI_Data/compete_unzip/train/Annotations", [], plot_type='points')
 
 
-# visualize_voc_xml(r"/home/data1/GeoAI_Data/compete_unzip/train/Annotations",
-#                   r"/home/data1/GeoAI_Data/compete_unzip/train/TIFFImages",
-#                   image_suffix='.tif',
+visualize_voc_xml(r"/home/data1/GeoAI_Data/warship_detect_HRSC/HRSC2016_part1/FullDataSet/first_select_Annotations",
+                  r"/home/data1/GeoAI_Data/warship_detect_HRSC/HRSC2016_part1/FullDataSet/k-fold/fold_v1/Images",
+                  image_suffix='.bmp',
 
-#                   show_pro=0.02
-#                   )
+                  show_pro=1
+                  )
 
 # output_big_wh(r"/home/data1/GeoAI_Data/compete_unzip/train/Annotations",10000)
 
 # analyse_obs_scale(r"/home/data1/GeoAI_Data/compete_unzip/train/Annotations")
 # analyse_obs_wh(r"/home/data1/GeoAI_Data/compete_unzip/train/Annotations")
 
-visual_large_tif_label(
-    xml_source=r"/home/data1/yw/github_projects/personal_github/code_aculat/data_operation/image_pre_none.txt",
-    image_dir=r"/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/k-fold/fold_v4/Images",
-    out_dir=r"./pre_none",
-    xml_dir=r"/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/train/Annotations")
+# visual_large_tif_label(
+#     xml_source=r"/home/data1/yw/github_projects/personal_github/code_aculat/data_operation/image_pre_none.txt",
+#     image_dir=r"/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/k-fold-v1/fold_v4/Images",
+#     out_dir=r"./pre_none",
+#     xml_dir=r"/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/train/Annotations")
 

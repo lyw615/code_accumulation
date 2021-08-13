@@ -1,4 +1,4 @@
-import os, platform,shutil
+import os, platform, shutil
 from matplotlib import pyplot as plt
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
@@ -28,6 +28,10 @@ def show_one_image(image, title=None):
     if title:
         plt.title(title)
     plt.show()
+    # outdir="/home/data1/yw/github_projects/personal_github/code_aculat/outship"
+    # os.makedirs(outdir,exist_ok=True)
+    # num=len(os.listdir(outdir))
+    # plt.savefig(os.path.join(outdir,"%d.png"%num))
 
 
 def draw_bboxes_on_image(image_path, bboxes, class_names, title=None):
@@ -58,7 +62,8 @@ def draw_bboxes_on_image(image_path, bboxes, class_names, title=None):
 
         if platform.system() == "Linux":
             txt_font = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
-            txt_font = ImageFont.truetype(txt_font, size=70)
+            # txt_font = "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc"
+            txt_font = ImageFont.truetype(txt_font, size=20)
             draw.text((int((bbox[0] + bbox[2]) / 2), bbox[3]), '%s' % class_name, font=txt_font)
         else:
             draw.text((int((bbox[0] + bbox[2]) / 2), bbox[3]), '%s' % class_name)
@@ -104,7 +109,8 @@ def draw_multi_bboxes(image, bboxes, color=None):
             width=4,
             fill=color[_])
 
-def draw_multi_bboxes_with_names(image, bboxes,class_names, color=None):
+
+def draw_multi_bboxes_with_names(image, bboxes, class_names, color=None):
     """
     Draw multi bounding box on image.
     Args:
@@ -125,7 +131,7 @@ def draw_multi_bboxes_with_names(image, bboxes,class_names, color=None):
             width=4,
             fill=color[_])
 
-        class_name=class_names[_]
+        class_name = class_names[_]
 
         if platform.system() == "Linux":
             txt_font = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
@@ -134,7 +140,8 @@ def draw_multi_bboxes_with_names(image, bboxes,class_names, color=None):
         else:
             draw.text((int((bbox[0] + bbox[2]) / 2), bbox[3]), '%s' % class_name)
 
-def show_bboxes_region(image_path, bboxes, class_names, out_dir,title=None):
+
+def show_bboxes_region(image_path, bboxes, class_names, out_dir, title=None):
     """
     bbox:[[xmin,ymin,xmax,ymax]] list
     主要针对大的tif影像,此时仅将bbox周围区域可视化,每个bbox会存成一张图
@@ -143,12 +150,12 @@ def show_bboxes_region(image_path, bboxes, class_names, out_dir,title=None):
     from rasterio.windows import Window
     with rasterio.open(image_path) as ds:
         for _ in range(len(bboxes)):
-            box=bboxes[_]
-            box=np.array(box,dtype=np.uint8)
-            class_name=class_names[_]
-            xmin,ymin,xmax,ymax=box
+            box = bboxes[_]
+            box = np.array(box, dtype=np.int)
+            class_name = class_names[_]
+            xmin, ymin, xmax, ymax = box
 
-            if xmin>=xmax or ymin>=ymax:
+            if xmin >= xmax or ymin >= ymax:
                 # print("error anno tif is  {}".format(os.path.basename(image_path)))
                 shutil.copy(image_path, os.path.join(out_dir, os.path.basename(image_path)))
                 continue
@@ -169,13 +176,10 @@ def show_bboxes_region(image_path, bboxes, class_names, out_dir,title=None):
             block = np.transpose(block, axes=(1, 2, 0))
             # image draw
             convert_img = Image.fromarray(block)
-            draw_multi_bboxes_with_names(convert_img, [box],class_name)  # draw multi box or one box
+            draw_multi_bboxes_with_names(convert_img, [box], class_name)  # draw multi box or one box
 
             plt.imshow(convert_img)
             # plt.show()
-            save_name = "%s_%s_%d.png" % (os.path.basename(image_path).split('.')[0],class_name, _)
+            save_name = "%s_%s_%d.png" % (os.path.basename(image_path).split('.')[0], class_name, _)
             save_path = os.path.join(out_dir, save_name)
             plt.savefig(save_path)
-
-
-
