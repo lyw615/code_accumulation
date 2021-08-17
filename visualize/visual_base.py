@@ -20,21 +20,26 @@ def show_two_image(image1, image2, title=None):
     plt.show()
 
 
-def show_one_image(image, title=None):
+def show_one_image(image, title=None,save_dir=None,save_name=None):
     from matplotlib import pyplot as plt
     fig = plt.figure(figsize=(10, 10))
     plt.imshow(image)
 
     if title:
         plt.title(title)
-    plt.show()
+
+    if  save_dir:
+        os.makedirs(save_dir, exist_ok=True)
+        plt.savefig(os.path.join(save_dir,save_name))
+    else:
+        plt.show()
     # outdir="/home/data1/yw/github_projects/personal_github/code_aculat/outship"
     # os.makedirs(outdir,exist_ok=True)
     # num=len(os.listdir(outdir))
     # plt.savefig(os.path.join(outdir,"%d.png"%num))
 
 
-def draw_bboxes_on_image(image_path, bboxes, class_names, title=None):
+def draw_bboxes_on_image(image_path, bboxes, class_names, title=None,save_dir=None,save_name=None):
     """
     bbox:[[xmin,ymin,xmax,ymax]] list
 
@@ -68,7 +73,7 @@ def draw_bboxes_on_image(image_path, bboxes, class_names, title=None):
         else:
             draw.text((int((bbox[0] + bbox[2]) / 2), bbox[3]), '%s' % class_name)
 
-    show_one_image(np.array(show_img), title)
+    show_one_image(np.array(show_img), title,save_dir=save_dir,save_name=save_name)
 
 
 def draw_bbox(image, bbox):

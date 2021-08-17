@@ -48,7 +48,7 @@ class labelme2coco(object):
 
         for num, json_file in enumerate(tqdm(self.labelme_json)):
             with open(json_file, 'r') as fp:
-                file_name = os.path.basename(json_file).split('.')[0] + '.jpg'
+                file_name = os.path.basename(json_file).split('.')[0] + '.bmp'
                 data = json.load(fp)  # ¼ÓÔØjsonÎÄ¼þ
                 self.images.append(self.image(data, num, file_name))
                 for shapes in data['shapes']:
@@ -66,19 +66,13 @@ class labelme2coco(object):
 
     def image(self, data, num, file_name):
         image = {}
-        img = utils.img_b64_to_arr(data['imageData'])  # ½âÎöÔ­Í¼Æ¬Êý¾Ý
-        # img=io.imread(data['imagePath']) # Í¨¹ýÍ¼Æ¬Â·¾¶´ò¿ªÍ¼Æ¬
-        # img = cv2.imread(data['imagePath'], 0)
-        height, width = img.shape[:2]
-        img = None
-        image['height'] = height
-        image['width'] = width
+        image['height'] = data['imageHeight']
+        image['width'] = data['imageWidth']
         image['id'] = num + 1
-        # image['file_name'] = data['imagePath'].split('/')[-1]
-        # image['file_name'] = data['imagePath'][3:14]
+
         image['file_name'] = file_name
-        self.height = height
-        self.width = width
+        self.height = data['imageHeight']
+        self.width = data['imageWidth']
 
         return image
 
@@ -163,23 +157,36 @@ class labelme2coco(object):
         json.dump(self.data_coco, open(self.save_json_path, 'w'), indent=4, cls=MyEncoder)  # indent=4 ¸ü¼ÓÃÀ¹ÛÏÔÊ¾
 
 
-labelme_json_dir = r"G:\mask"
-outdir = r"G:\outcoco"
+def convert(labelme_json_dir, outdir, portion=0.8, split_source=None):
+    js_train_val = os.listdir(labelme_json_dir)
+    random.shuffle(js_train_val)
 
+    if split_source:
+        with open(os.path.join(split_source, 'new_train.csv'), 'r') as f:
+            lines = f.readlines()
+            train_port = [os.path.join(labelme_json_dir, x.strip('\n') + ".json") for x in lines]
+
+        with open(os.path.join(split_source, 'new_test.csv'), 'r') as f:
+            lines = f.readlines()
+            val_port = [os.path.join(labelme_json_dir, x.strip('\n') + ".json") for x in lines]
+    else:
+        # split json to train val
+        portion = 0.8
+        train_num = int(len(js_train_val) * portion)
+        train_port = js_train_val[:train_num]
+        val_port = js_train_val[train_num:]
+
+        train_port = [os.path.join(labelme_json_dir, x) for x in train_port]
+        val_port = [os.path.join(labelme_json_dir, x) for x in val_port]
+
+    # labelme_json=['./Annotations/*.json']
+
+    labelme2coco(train_port, os.path.join(outdir, "train.json"))
+    labelme2coco(val_port, os.path.join(outdir, "val.json"))
+
+
+labelme_json_dir = r"G:\hrsc\fine_ship"
+outdir = r"E:\k-fold-fine\fold_v1"
+csv_dir = r"E:\k-fold-fine\fold_v1"
 os.makedirs(outdir, exist_ok=True)
-js_train_val = os.listdir(labelme_json_dir)
-random.shuffle(js_train_val)
-
-# split json to train val
-portion = 0.8
-train_num = int(len(js_train_val) * portion)
-train_port = js_train_val[:train_num]
-val_port = js_train_val[train_num:]
-
-train_port = [os.path.join(labelme_json_dir, x) for x in train_port]
-val_port = [os.path.join(labelme_json_dir, x) for x in val_port]
-
-# labelme_json=['./Annotations/*.json']
-
-labelme2coco(train_port, os.path.join(outdir, "train.json"))
-labelme2coco(val_port, os.path.join(outdir, "val.json"))
+convert(labelme_json_dir, outdir, split_source=csv_dir)

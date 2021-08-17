@@ -3,7 +3,6 @@ import numpy as np
 import os, rasterio
 from rasterio.windows import Window
 from tqdm import tqdm
-import mmcv
 from matplotlib import pyplot as plt
 from PIL import Image, ImageDraw
 
@@ -11,7 +10,9 @@ sys.path.append("/home/data1/yw/github_projects/personal_github")
 from code_aculat.visualize.visual_base import draw_multi_bboxes
 
 underwater_classes = ['holothurian', 'echinus', 'scallop', 'starfish']
-from mmdet.core.visualization import imshow_det_bboxes
+
+
+# from mmdet.core.visualization import imshow_det_bboxes
 
 
 def bbox_iou(box1, box2):
@@ -51,6 +52,7 @@ def get_segmentation(points):
 
 
 def generate_json(img_root, annos, out_file):
+    import mmcv
     images = []
     annotations = []
 
