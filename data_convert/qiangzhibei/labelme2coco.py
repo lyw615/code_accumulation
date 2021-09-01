@@ -26,7 +26,7 @@ class MyEncoder(json.JSONEncoder):
 
 
 class labelme2coco(object):
-    def __init__(self, labelme_json=[], save_json_path='./tran.json'):
+    def __init__(self, labelme_json=[], fix_categories2id=None, save_json_path='./tran.json', suffix='.bmp'):
         '''
         :param labelme_json: ËùÓÐlabelmeµÄjsonÎÄ¼þÂ·¾¶×é³ÉµÄÁÐ±í
         :param save_json_path: json±£´æÎ»ÖÃ
@@ -34,33 +34,36 @@ class labelme2coco(object):
         self.labelme_json = labelme_json
         self.save_json_path = save_json_path
         self.images = []
-        self.categories = []
+        self.categories = fix_categories2id
         self.annotations = []
         # self.data_coco = {}
-        self.label = []
+        # self.label = []
         self.annID = 1
         self.height = 0
         self.width = 0
-
+        self.suffix = suffix
         self.save_json()
 
     def data_transfer(self):
 
         for num, json_file in enumerate(tqdm(self.labelme_json)):
             with open(json_file, 'r') as fp:
-                file_name = os.path.basename(json_file).split('.')[0] + '.bmp'
+                file_name = os.path.basename(json_file).split('.')[0] + self.suffix
                 data = json.load(fp)  # ¼ÓÔØjsonÎÄ¼þ
                 self.images.append(self.image(data, num, file_name))
                 for shapes in data['shapes']:
                     label = shapes['label']
-                    if label != "ship":
-                        continue
-                    if label not in self.label:
-                        self.categories.append(self.categorie(label))
-                        self.label.append(label)
-                    points = shapes['points']  # ÕâÀïµÄpointÊÇÓÃrectangle±ê×¢µÃµ½µÄ£¬Ö»ÓÐÁ½¸öµã£¬ÐèÒª×ª³ÉËÄ¸öµã
+
+                    # if label == "ship":
+                    #     continue
+
+                    # if label not in self.label:
+                    #     self.categories.append(self.categorie(label))
+                    #     self.label.append(label)
                     # points.append([points[0][0],points[1][1]])
                     # points.append([points[1][0],points[0][1]])
+
+                    points = shapes['points']  # ÕâÀïµÄpointÊÇÓÃrectangle±ê×¢µÃµ½µÄ£¬Ö»ÓÐÁ½¸öµã£¬ÐèÒª×ª³ÉËÄ¸öµã
                     self.annotations.append(self.annotation(points, label, num))
                     self.annID += 1
 
@@ -76,12 +79,12 @@ class labelme2coco(object):
 
         return image
 
-    def categorie(self, label):
-        categorie = {}
-        categorie['supercategory'] = 'Cancer'
-        categorie['id'] = len(self.label) + 1  # 0 Ä¬ÈÏÎª±³¾°
-        categorie['name'] = label
-        return categorie
+    # def categorie(self, label):
+    #     categorie = {}
+    #     categorie['supercategory'] = 'Cancer'
+    #     categorie['id'] = len(self.label) + 1  # 0 Ä¬ÈÏÎª±³¾°
+    #     categorie['name'] = label
+    #     return categorie
 
     def annotation(self, points, label, num):
         annotation = {}
@@ -93,15 +96,15 @@ class labelme2coco(object):
         annotation['bbox'] = list(map(float, self.getbbox(points)))
         annotation['area'] = annotation['bbox'][2] * annotation['bbox'][3]
         # annotation['category_id'] = self.getcatid(label)
-        annotation['category_id'] = self.getcatid(label)  # ×¢Òâ£¬Ô´´úÂëÄ¬ÈÏÎª1
+        annotation['category_id'] = self.categories[label]  # ×¢Òâ£¬Ô´´úÂëÄ¬ÈÏÎª1
         annotation['id'] = self.annID
         return annotation
 
-    def getcatid(self, label):
-        for categorie in self.categories:
-            if label == categorie['name']:
-                return categorie['id']
-        return 1
+    # def getcatid(self, label):
+    #     for categorie in self.categories:
+    #         if label == categorie['name']:
+    #             return categorie['id']
+    #     return 1
 
     def getbbox(self, points):
         # img = np.zeros([self.height,self.width],np.uint8)
@@ -145,8 +148,14 @@ class labelme2coco(object):
 
     def data2coco(self):
         data_coco = {}
+        categories_list = []
+
         data_coco['images'] = self.images
-        data_coco['categories'] = self.categories
+
+        for key, value in self.categories.items():
+            categories_list.append({'name': key, 'id': value})
+
+        data_coco['categories'] = categories_list
         data_coco['annotations'] = self.annotations
         return data_coco
 
@@ -157,7 +166,7 @@ class labelme2coco(object):
         json.dump(self.data_coco, open(self.save_json_path, 'w'), indent=4, cls=MyEncoder)  # indent=4 ¸ü¼ÓÃÀ¹ÛÏÔÊ¾
 
 
-def convert(labelme_json_dir, outdir, portion=0.8, split_source=None):
+def convert(labelme_json_dir, outdir, fix_categories2id, portion=0.8, split_source=None, suffix=None):
     js_train_val = os.listdir(labelme_json_dir)
     random.shuffle(js_train_val)
 
@@ -181,12 +190,15 @@ def convert(labelme_json_dir, outdir, portion=0.8, split_source=None):
 
     # labelme_json=['./Annotations/*.json']
 
-    labelme2coco(train_port, os.path.join(outdir, "train.json"))
-    labelme2coco(val_port, os.path.join(outdir, "val.json"))
+    labelme2coco(train_port, fix_categories2id, os.path.join(outdir, "train.json"), suffix)
+    labelme2coco(val_port, fix_categories2id, os.path.join(outdir, "val.json"), suffix)
 
 
-labelme_json_dir = r"G:\hrsc\fine_ship"
-outdir = r"E:\k-fold-fine\fold_v1"
-csv_dir = r"E:\k-fold-fine\fold_v1"
+fix_categories2id = {"1": 1, "2": 2, "15": 3, "21": 4, "22": 5, "23": 6}  # 每次都要硬编码这个类别和id的对应关系，避免训练集和验证集的不一样
+fix_categories2id = {"14": 14}  # 每次都要硬编码这个类别和id的对应关系，避免训练集和验证集的不一样
+suffix = '.bmp'
+labelme_json_dir = r"D:\BaiduNetdiskDownload\强智杯-20210814-军舰军机-训练数据\outship_cls_num\big_41\41\mask"
+outdir = r"G:\hrsc\out_coco"
+# csv_dir = r"E:\k-fold-fine\fold_v1"
 os.makedirs(outdir, exist_ok=True)
-convert(labelme_json_dir, outdir, split_source=csv_dir)
+convert(labelme_json_dir, outdir, fix_categories2id, split_source=None, suffix=suffix)

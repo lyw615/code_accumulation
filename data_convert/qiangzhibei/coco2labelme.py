@@ -44,7 +44,7 @@ def reference_labelme_json(ref_json_path):
 def labelme_shapes(data_ref, anno_list, id2category, score_thresh):
     shapes = []
     # label_num = {'person': 0, 'bicycle': 0, 'car': 0, 'motorcycle': 0, 'bus': 0, 'train': 0, 'truck': 0}  # 根据你的数据来修改
-    label_num = {'ship': 0}  # 根据你的数据来修改
+    # label_num = {'ship': 0}  # 根据你的数据来修改
     for ann in anno_list:
         shape = {}
 
@@ -144,7 +144,7 @@ def sparse_mmdet_out_json(test_json, pre_json):
 
 
 if __name__ == '__main__':
-    out_dir = r'G:\hrsc\mask'
+    out_dir = r'G:\hrsc\mask_raw'
     os.makedirs(out_dir, exist_ok=True)
 
     test_json = r"G:\target_img.json"  # mmdet的test json 和预测出的json
