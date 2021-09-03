@@ -8,7 +8,22 @@ from tqdm import tqdm
 import numpy as np
 from matplotlib import pyplot as plt
 from code_aculat.visualize.plot_tools import plot_points
+from code_aculat.utils.xml_process  import analyze_xml
 
+def find_empty_xml(xml_dir):
+    xml_files=os.listdir(xml_dir)
+    empty_list=[]
+
+    for xml in xml_files:
+        xml_path=os.path.join(xml_dir,xml)
+        class_name, rectangle_position=analyze_xml(xml_path,check_bbox=True)
+        if len(class_name)==0:
+            empty_list.append(xml)
+
+    if len(empty_list)>0:
+        print(empty_list)
+    else:
+        print("there is no empty xml")
 
 def get_xmls_name_from_csv(csv_file_path):
     "从csv的记录里得到xml的名称"
@@ -285,6 +300,61 @@ def analyse_obs_scale(names_resource, xml_dir=None):
     assert len(wh_scale) > 0, "xml文件里没有找到对象信息"
     wh_scale = np.array(wh_scale)
     plot_points([(wh_scale[:, 0], wh_scale[:, 1])], label="w//x with h//y")
+
+def analyse_obs_size_after_resized(names_resource, shorter_edges,xml_dir=None):
+    """
+       目标在原图resize到指定尺度下的宽高，如果提供的names_resource是csv文件，
+       则同时需要提供xml文件夹路径，如果提供的是xml文件夹路径，那么赋给第一个参数就行
+       shorter_edges: [(4000,800),(4000,600)]
+    """
+    from collections import Counter
+    if os.path.isfile(names_resource):
+        "如果把xml文件名存在txt或者csv文件里"
+        with open(names_resource, 'r', encoding="utf-8") as f:
+            names = f.readlines()
+    elif os.path.isdir(names_resource):
+        "如果提供xml文件夹路径"
+        names = os.listdir(names_resource)
+        xml_dir = names_resource
+
+
+    ob_scale_dict={x[1]:[] for x  in shorter_edges}
+    for _ in tqdm(names):
+
+        xml_path = os.path.join(xml_dir, _)
+        fp = open(xml_path)
+
+        for p in fp:
+            if '<size>' in p:
+                width, height = [round(eval(next(fp).split('>')[1].split('<')[0])) for _ in range(2)]
+            if '<bndbox>' in p:
+                bbox = [(round(eval(next(fp).split('>')[1].split('<')[0]))) for _ in range(4)]
+                x = bbox[2] - bbox[0]
+                y = bbox[3] - bbox[1]
+
+                for edge in shorter_edges:
+                    longer,shorter=edge
+                    if width>=height:
+                        scale=shorter/height
+                        if int(scale*width)>longer:
+                            scale=longer/width
+
+                    else:
+                        scale = shorter / width
+                        if int(scale * height) > longer:
+                            scale = longer / height
+                    x = int(scale * x)
+                    y = int(scale * y)
+
+                    ob_scale_dict[edge[1]].append([x,y])
+
+
+        fp.close()
+
+    for key,value in ob_scale_dict.items():
+        assert len(value) > 0, "xml文件里没有找到对象信息"
+        wh_scale = np.array(value)
+        plot_points([(wh_scale[:, 0], wh_scale[:, 1])], label=key)
 
 
 def analyse_obs_wh(names_resource, xml_dir=None):

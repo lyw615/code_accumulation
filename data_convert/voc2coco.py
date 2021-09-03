@@ -10,9 +10,6 @@ import glob
 from tqdm import tqdm
 
 START_BOUNDING_BOX_ID = 1
-# 预定义类别名称和编号
-PRE_DEFINE_CATEGORIES = {"echinus": 1, "scallop": 2, "starfish": 3, "holothurian": 4, "waterweeds": 5}
-PRE_DEFINE_CATEGORIES = {"Airport": 1, "Port": 2}
 
 
 # If necessary, pre-define category and its id
@@ -101,8 +98,8 @@ def convert(xml_dir, csv_path, json_file):
         if len(path) == 1:
             filename = os.path.basename(path[0].text)
         elif len(path) == 0:
-            # filename = get_and_check(root, "filename", 1).text
-            filename = get_and_check(root, "frame", 1).text
+            filename = get_and_check(root, "filename", 1).text
+            # filename = get_and_check(root, "frame", 1).text
         else:
             raise ValueError("%d paths found in %s" % (len(path), xml_file))
         ## The filename must be a number
@@ -183,11 +180,18 @@ if __name__ == "__main__":
     )
 
     parser.add_argument("--xml_dir", help="Directory path to xml files.", type=str,
-                        default="/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/train/Annotations")
+                        default="/home/data1/yw/data/compt_data/qzb_ship/first_select_Annotations")
     parser.add_argument("--csv_dir", help="Path to csv directory.", type=str,
-                        default="/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/k-fold-v2/fold_v5")
+                        default="/home/data1/yw/data/compt_data/qzb_ship/fold_v1/new_test.csv")
 
     args = parser.parse_args()
+    # 预定义类别名称和编号
+    PRE_DEFINE_CATEGORIES = {"echinus": 1, "scallop": 2, "starfish": 3, "holothurian": 4, "waterweeds": 5}
+    PRE_DEFINE_CATEGORIES = {"Airport": 1, "Port": 2}
+    # PRE_DEFINE_CATEGORIES = {"10": 10, "11": 11,"21":21,"22":22,"23":23,"15":15,"52":52}
+
+    PRE_DEFINE_CATEGORIES ={"23": 23, "22": 22, "21": 21, "2": 2, "1": 1, "15": 15}
+
 
     # If you want to do train/test split, you can pass a subset of xml files to convert function.
     if args.csv_dir == None:

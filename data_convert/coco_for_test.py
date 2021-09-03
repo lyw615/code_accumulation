@@ -12,7 +12,10 @@ def json_from_imagedir(images_dir, annot_dst_path, train_img_source=None):
 
     # {"echinus": 1,"scallop": 2,"starfish": 3,"holothurian": 4}
     js = {'images': [], 'annotations': [],
-          'categories': [{'id': 1, 'name': "Airport"}, {'id': 2, 'name': "Port"}], }  # {'id': 5, 'name': "waterweeds"}
+          # 'categories': [{'id': 1, 'name': "Airport"}, {'id': 2, 'name': "Port"}],
+          # 'categories': [{'id': 1, 'name': "ship"}],
+          'categories': [{'id': 1, 'name': "23"},{'id': 2, 'name': "22"},{'id': 3, 'name': "21"},{'id': 4, 'name': "2"},{'id': 5, 'name': "1"},{'id': 6, 'name': "15"}],
+          }  # {'id': 5, 'name': "waterweeds"}
     # {"echinus": 1, "scallop": 2, "starfish": 3, "holothurian": 4}
 
     if not train_img_source:
@@ -37,10 +40,10 @@ def json_from_imagedir(images_dir, annot_dst_path, train_img_source=None):
                 height = ds.height
                 width = ds.width
         else:
-            # img = cv2.imread(img_path)
-            # height = img.shape[0]
-            # width = img.shape[1]
-            continue
+            img = cv2.imread(img_path)
+            height = img.shape[0]
+            width = img.shape[1]
+            # continue
 
         js['images'].append({'file_name': img_name, 'height': height, 'width': width, 'id': img_id})
         js['annotations'].append(
@@ -56,7 +59,8 @@ def json_from_imagedir(images_dir, annot_dst_path, train_img_source=None):
 
 if __name__ == '__main__':
     "mmdetection need json list  as image list to be predicted"
-    train_img_source = '/home/data1/yw/github_projects/personal_github/code_aculat/data_operation/image_pre_none.txt'
-    images_dir = '/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/train/TIFFImages'
-    annot_dst_path = '/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/k-fold-v2/fold_v1/31.json'
+    train_img_source = '/home/data1/yw/data/compt_data/qzb_ship/target_img.txt'
+    train_img_source = '/home/data1/yw/data/iobjectspy_out/mmdetection/show_fine'
+    images_dir = '/home/data1/yw/data/compt_data/qzb_ship/k-fold/fold_v1/Images'
+    annot_dst_path = '/home/data1/yw/data/compt_data/qzb_ship/valid_show_fine.json'
     json_from_imagedir(images_dir, annot_dst_path, train_img_source)
