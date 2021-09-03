@@ -76,7 +76,7 @@ def visual_image_wh(xml_dir, xmls=None, plot_type='points'):
 
             saved_value2count = saved_value2count[np.argsort(saved_value2count[:, 0])]  # 显示的时候x坐标升序
 
-            wh_dataframe = pd.DataFrame(np.array(saved_value2count[:, 1], dtype=np.uint8),
+            wh_dataframe = pd.DataFrame(np.array(saved_value2count[:, 1], dtype=np.int),
                                         index=saved_value2count[:, 0], columns=["w,h,w*h"])
             wh_dataframe.plot(kind='bar', color="#55aacc")
             plt.show()

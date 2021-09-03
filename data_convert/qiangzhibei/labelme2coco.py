@@ -5,7 +5,8 @@ import argparse
 import json, os
 import matplotlib.pyplot as plt
 import skimage.io as io
-import cv2, random
+# import cv2, random
+import random
 from labelme import utils
 import numpy as np
 import glob
@@ -180,25 +181,61 @@ def convert(labelme_json_dir, outdir, fix_categories2id, portion=0.8, split_sour
             val_port = [os.path.join(labelme_json_dir, x.strip('\n') + ".json") for x in lines]
     else:
         # split json to train val
-        portion = 0.8
-        train_num = int(len(js_train_val) * portion)
-        train_port = js_train_val[:train_num]
-        val_port = js_train_val[train_num:]
+        if portion != 1:
+            train_num = int(len(js_train_val) * portion)
+            train_port = js_train_val[:train_num]
+            val_port = js_train_val[train_num:]
 
-        train_port = [os.path.join(labelme_json_dir, x) for x in train_port]
-        val_port = [os.path.join(labelme_json_dir, x) for x in val_port]
-
+            train_port = [os.path.join(labelme_json_dir, x) for x in train_port]
+            val_port = [os.path.join(labelme_json_dir, x) for x in val_port]
+        else:
+            train_port = [os.path.join(labelme_json_dir, x) for x in js_train_val]
+            val_port = []
     # labelme_json=['./Annotations/*.json']
 
     labelme2coco(train_port, fix_categories2id, os.path.join(outdir, "train.json"), suffix)
-    labelme2coco(val_port, fix_categories2id, os.path.join(outdir, "val.json"), suffix)
+
+    if len(val_port) > 0:
+        labelme2coco(val_port, fix_categories2id, os.path.join(outdir, "val.json"), suffix)
 
 
-fix_categories2id = {"1": 1, "2": 2, "15": 3, "21": 4, "22": 5, "23": 6}  # 每次都要硬编码这个类别和id的对应关系，避免训练集和验证集的不一样
-fix_categories2id = {"14": 14}  # 每次都要硬编码这个类别和id的对应关系，避免训练集和验证集的不一样
-suffix = '.bmp'
-labelme_json_dir = r"D:\BaiduNetdiskDownload\强智杯-20210814-军舰军机-训练数据\outship_cls_num\big_41\41\mask"
-outdir = r"G:\hrsc\out_coco"
-# csv_dir = r"E:\k-fold-fine\fold_v1"
-os.makedirs(outdir, exist_ok=True)
-convert(labelme_json_dir, outdir, fix_categories2id, split_source=None, suffix=suffix)
+def base_func():
+    fix_categories2id = {"1": 1, "2": 2, "15": 3, "21": 4, "22": 5, "23": 6}  # 每次都要硬编码这个类别和id的对应关系，避免训练集和验证集的不一样
+    fix_categories2id = {"14": 14}  # 每次都要硬编码这个类别和id的对应关系，避免训练集和验证集的不一样
+    suffix = '.bmp'
+    labelme_json_dir = r"D:\BaiduNetdiskDownload\强智杯-20210814-军舰军机-训练数据\outship_cls_num\big_41\41\mask"
+    outdir = r"G:\hrsc\out_coco"
+    # csv_dir = r"E:\k-fold-fine\fold_v1"
+    os.makedirs(outdir, exist_ok=True)
+    convert(labelme_json_dir, outdir, fix_categories2id, split_source=None, suffix=suffix)
+
+
+def modi_base():
+    input_dir = r"D:\BaiduNetdiskDownload\强智杯-20210814-军舰军机-训练数据\outship_cls_num"
+    outdir = r"G:\empty_paste_out"
+    suffix = '.jpg'
+    os.makedirs(outdir, exist_ok=True)
+
+    drop_dir = ["big_21", "big_22", "big_19"]
+    fix_categories2id = {}  # 每次都要硬编码这个类别和id的对应关系，避免训练集和验证集的不一样
+
+    for dirname in os.listdir(input_dir):
+        if dirname in drop_dir:
+            continue
+        fix_categories2id[dirname.split("_")[-1]] = int(dirname.split("_")[-1])
+
+    for dirname in os.listdir(input_dir):
+        if dirname in drop_dir:
+            continue
+
+        labelme_json_dir = os.path.join(input_dir, dirname, "masks")
+        assert os.path.exists(labelme_json_dir)
+        single_out_dir = os.path.join(outdir, dirname)
+        os.makedirs(single_out_dir)
+
+        convert(labelme_json_dir, single_out_dir, fix_categories2id, split_source=None, suffix=suffix, portion=1)
+
+
+if __name__ == "__main__":
+    # base_func()
+    modi_base()

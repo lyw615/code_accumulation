@@ -69,35 +69,6 @@ def img_add(img_src, img_main, mask_src):
     return img_main
 
 
-def img_add_modi(img_main, rotate_list):
-    if len(img_main.shape) == 3:
-        h, w, c = img_main.shape
-    elif len(img_main.shape) == 2:
-        h, w = img_main.shape
-
-    for i in range(len(rotate_list)):
-        mask_src, img_src = rotate_list[i]
-        mask = np.asarray(mask_src, dtype=np.uint8)
-        sub_img01 = cv2.add(img_src, np.zeros(np.shape(img_src), dtype=np.uint8), mask=mask)
-
-        if sub_img01.shape != img_main.shape:
-            sub_img01 = cv2.resize(sub_img01, (img_main.shape[1], img_main.shape[0]), interpolation=cv2.INTER_NEAREST)
-        # show_two_image(sub_img01,mask)
-
-        if mask.shape != img_main.shape[:2]:
-            mask = cv2.resize(mask, (w, h), interpolation=cv2.INTER_NEAREST)
-
-        mask_02 = np.asarray(mask, dtype=np.uint8)
-        sub_img02 = cv2.add(img_main, np.zeros(np.shape(img_main), dtype=np.uint8),
-                            mask=mask_02)
-        # show_two_image(sub_img02,mask_02)
-
-        img_main = img_main - sub_img02 + sub_img01
-
-        # 计算已有标签的外接矩形，然后看是否有空间填充更多的标签，而且得保证标签不能在过于边缘的地方
-    return img_main
-
-
 def show_two_image(image1, image2, title=None):
     # 同时可视化两个RGB或者mask
     from matplotlib import pyplot as plt
@@ -256,11 +227,7 @@ def process_mask(img_src, mask_src, main_shape):
     et_img = cv2.resize(et_img, (new_col, new_row))
     et_mask = cv2.resize(et_mask, (new_col, new_row))
 
-    # 进行亮度和对比度修改
-    import copy
-    ii_et = copy.deepcopy(et_img)
-    et_img = RandomBrightnessContrast(brightness_limit=0.4, contrast_limit=0.4, p=7)(image=et_img)["image"]
-    show_two_image(ii_et, et_img)
+    # show_two_image(ii_et, et_img)
 
     # show_two_image(et_img,et_mask)
     # 缩放后的图贴到与main_shape相同的0矩阵
@@ -285,7 +252,7 @@ def copy_paste(mask_src, img_src, mask_main, img_main):
     # mask_src_right = HorizontalFlip(p=1)(image=mask_src)
     # img_src_right= HorizontalFlip(p=1)(image=img_src)
 
-    for degree in np.random.uniform(0, 360, 1):
+    for degree in np.random.uniform(0, 360, 2):
         # for degree in np.random.uniform(0,360,36):
 
         _mask = Rotate(p=1, limit=(degree, degree))(image=mask_src)["image"]
@@ -312,6 +279,8 @@ def copy_paste(mask_src, img_src, mask_main, img_main):
         # _mask, _img = rescale_src(_mask, _img, h, w)  # 如果是只使用rescale，那得到的mask和img在shape上与main的是一样的
 
         img = img_add(_img, img_main, _mask)
+        # 进行亮度和对比度修改
+        img = RandomBrightnessContrast(brightness_limit=0.25, contrast_limit=0.25, p=0.7)(image=img)["image"]
         mask = img_add(_mask, mask_main, _mask)
 
         # show_two_image(img_main,img)
@@ -324,6 +293,7 @@ def main(args):
     # background image path
     # JPEGs_main = os.path.join(args.main_dir, 'images',"val")
     JPEGs_main = args.main_dir
+    suffix = args.suffix
 
     segclass_src = os.path.join(args.src_dir, 'SegmentationClass')
     JPEGs_src = os.path.join(args.src_dir, 'JPEGImages')
@@ -339,7 +309,7 @@ def main(args):
     for mask_path in tqdm.tqdm(masks_path_src):
         # get source mask and img
         mask_src = np.asarray(Image.open(os.path.join(segclass_src, mask_path)), dtype=np.uint8)
-        img_src = cv2.imdecode(np.fromfile(os.path.join(JPEGs_src, mask_path.replace('.png', '.jpg')), dtype=np.uint8),
+        img_src = cv2.imdecode(np.fromfile(os.path.join(JPEGs_src, mask_path.replace('.png', ".jpg")), dtype=np.uint8),
                                flags=1)
 
         zero_size = int(max(img_src.shape) * 1.5)  # 最长边的1.5倍，那样就能360度旋转不丢像素
@@ -365,10 +335,7 @@ def main(args):
         # _ii=copy.deepcopy(img_main)
 
         img_size = 1200
-        try:
-            rs_ratio = img_size / min(img_main.shape[:2]) + 0.001
-        except:
-            pass
+        rs_ratio = img_size / max(img_main.shape[:2]) + 0.001
         img_main = cv2.resize(img_main, (int(img_main.shape[1] * rs_ratio), int(img_main.shape[0] * rs_ratio)))
 
         mask_main = np.zeros(img_main.shape[:2], dtype=np.uint8)
@@ -382,10 +349,10 @@ def main(args):
 
             out_mask_dir = os.path.join(args.output_dir, 'SegmentationClass')
             mask_filename = "%d.png" % len(os.listdir(out_mask_dir))
-            img_filename = mask_filename.replace('.png', '.jpg')
+            img_filename = mask_filename.replace('.png', suffix)
             save_colored_mask(mask, os.path.join(out_mask_dir, mask_filename))
 
-            suffix = ".%s" % img_main_path.split('.')[-1]
+            # suffix = ".%s" % img_main_path.split('.')[-1]
             cv2.imencode(suffix, img)[1].tofile(os.path.join(args.output_dir, 'JPEGImages', img_filename))
 
 
@@ -393,16 +360,44 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--main_dir", default=r"G:\背景军港\export_bg1", type=str,
                         help="to be pasted directory")
-    parser.add_argument("--src_dir", default=r"D:\BaiduNetdiskDownload\强智杯-20210814-军舰军机-训练数据\outship_cls_num\big_41",
+    parser.add_argument("--src_dir", default=r"G:\empty_paste_out\big_31",
                         type=str,
                         help="to be copyed directory")
-    parser.add_argument("--output_dir", default=r"G:\hrsc\out_paste", type=str,
+    parser.add_argument("--output_dir", default=r"G:\empty_paste_out\big_31\out_paste", type=str,
                         help="output dataset directory")
     parser.add_argument("--lsj", default=False, type=bool, help="if use Large Scale Jittering, now not using")
+    parser.add_argument("--suffix", default=".bmp", type=str, help="image format")
     return parser.parse_args()
 
 
+def modi_get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--main_dir", default=r"G:\背景军港\export_bg1", type=str,
+                        help="to be pasted directory")
+    parser.add_argument("--src_dir", default=r"G:\empty_paste_out",
+                        type=str,
+                        help="to be copyed directory")
+
+    parser.add_argument("--lsj", default=False, type=bool, help="if use Large Scale Jittering, now not using")
+    parser.add_argument("--suffix", default=".jpg", type=str, help="image format")
+    parser.add_argument("--output_dir", default=None, type=str,
+                        help="output dataset directory")
+    return parser.parse_args()
+
+
+# def multi_dir_apply(args):
+#     src_dir=args.src_dir
+#
+#     dirnames=os.listdir(src_dir)
+#     for dirname in dirnames:
+#         args.src_dir=os.path.join(src_dir,dirname)
+#         args.output_dir=os.path.join(src_dir,"out_pasted")
+
+
 if __name__ == '__main__':
+    # 把标注好的mask部分，随机缩放、旋转粘贴到背景图
     # "每个对象的mask用不同的像素值表示，这样方便把像素都叠加到一起后提取出单个对象的mask"
     args = get_args()
     main(args)
+    # args=modi_get_args()
+    # multi_dir_apply(args)
