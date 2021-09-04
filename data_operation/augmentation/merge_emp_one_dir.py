@@ -23,8 +23,10 @@ def get_annos_from_mask(mask_path, image_id, cate_id, instance_id):
     ground_truth_binary_mask = mask_arr[:, :, 1]
     if ground_truth_binary_mask.max() < 1:
         ground_truth_binary_mask = mask_arr[:, :, 2]
-        if mask_arr.max < 1:
-            raise ("max mask value low than 1")
+        if ground_truth_binary_mask.max() < 1:
+            ground_truth_binary_mask = mask_arr[:, :, 0]
+            if ground_truth_binary_mask.max() < 1:
+                raise ("max mask value low than 1 %s %s" % (mask_dir, mask))
 
     contours = measure.find_contours(ground_truth_binary_mask, 0.5)
 
@@ -56,10 +58,10 @@ def get_annos_from_mask(mask_path, image_id, cate_id, instance_id):
     return annos_list, instance_id, mask_arr.shape
 
 
-# 自成一个coco json，然后合并两个coco，之后再基于coco划分
-input_dir = r"G:\empty_paste_out"
-out_img_dir = r"G:\toge"
-out_coco_path = r".\outcoco.json"
+# 自成一个coco json，然后合并两个coco
+input_dir = r"/home/data1/yw/copy_paste_empty/500_aug/out_paste"
+out_img_dir = r"/home/data1/yw/copy_paste_empty/500_aug/out_toge1"
+out_coco_path = r"/home/data1/yw/copy_paste_empty/500_aug/outcoco1.json"
 os.makedirs(out_img_dir, exist_ok=True)
 
 class_ids = {}
@@ -82,8 +84,8 @@ for dirname in os.listdir(input_dir):
     class_num = dirname.split("_")[-1]
     class_id = class_ids[class_num]
 
-    img_dir = os.path.join(single_dir, "out_paste", 'JPEGImages')
-    mask_dir = os.path.join(single_dir, "out_paste", 'SegmentationClass')
+    img_dir = os.path.join(single_dir, 'JPEGImages')
+    mask_dir = os.path.join(single_dir, 'SegmentationClass')
 
     for mask in os.listdir(mask_dir):
         mask_path = os.path.join(mask_dir, mask)

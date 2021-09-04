@@ -29,70 +29,81 @@ def show_two_image(image1, image2, title=None):
     plt.show()
 
 
-mask_dir = r"D:\BaiduNetdiskDownload\强智杯-20210814-军舰军机-训练数据\outship_cls_num\big_72\SegmentationClass"
-img_dir = r"D:\BaiduNetdiskDownload\强智杯-20210814-军舰军机-训练数据\outship_cls_num\big_72\images\train"
+input_dir = r"/home/data1/yw/copy_paste_empty/empty_paste_out"
+out_dir = "/home/data1/yw/copy_paste_empty/500_aug/out_paste"
+for dirname in os.listdir(input_dir):
+    if dirname in ["big_21", 'big_22']:
+        continue
 
-out_dir = os.path.join(os.path.dirname(img_dir), "out_dir")
-out_mask_dir = os.path.join(out_dir, 'mask')
-out_img_dir = os.path.join(out_dir, 'img')
+    mask_dir = os.path.join(input_dir, dirname, "SegmentationClass")
+    img_dir = os.path.join(input_dir, dirname, "JPEGImages")
 
-os.makedirs(out_mask_dir, exist_ok=True)
-os.makedirs(out_img_dir, exist_ok=True)
+    out_mask_dir = os.path.join(out_dir, dirname, "SegmentationClass")
+    out_img_dir = os.path.join(out_dir, dirname, "JPEGImages")
 
-masks = os.listdir(mask_dir)
+    # out_dir = os.path.join(os.path.dirname(img_dir), "out_dir")
+    # out_mask_dir = os.path.join(out_dir, 'mask')
+    # out_img_dir = os.path.join(out_dir, 'img')
 
-for mask in masks:
-    img_name = mask.replace('.png', '.jpg')
+    os.makedirs(out_mask_dir, exist_ok=True)
+    os.makedirs(out_img_dir, exist_ok=True)
 
-    img_list = []
-    mask_list = []
+    masks = os.listdir(mask_dir)
 
-    mask_arr_raw = cv2.imdecode(np.fromfile(os.path.join(mask_dir, mask), dtype=np.uint8), 1)
-    mask_arr = mask_arr_raw[:, :, 1]
-    if mask_arr.max() < 1:
-        mask_arr = mask_arr_raw[:, :, 2]
-        if mask_arr.max < 1:
-            raise ("max mask value low than 1")
-    img_arr = cv2.imdecode(np.fromfile(os.path.join(img_dir, img_name), dtype=np.uint8), 1)  # imencode会自动把bgr转成rgb
+    for mask in masks:
+        img_name = mask.replace('.png', '.jpg')
 
-    ts_img = np.transpose(img_arr, axes=(1, 0, 2))
-    ts_mk = np.transpose(mask_arr, axes=(1, 0))
+        img_list = []
+        mask_list = []
 
-    # show_two_image(img_arr,ts_img)
-    # out_img_name = "%s.jpg" % len(os.listdir(out_img_dir))
-    # cv2.imencode('.jpg', ts_img)[1].tofile(os.path.join(out_img_dir, out_img_name))
-    # out_mk_name=out_img_name.replace(".jpg",'.png')
-    # save_colored_mask(ts_mk, os.path.join(out_mask_dir,out_mk_name))
+        mask_arr_raw = cv2.imdecode(np.fromfile(os.path.join(mask_dir, mask), dtype=np.uint8), 1)
+        mask_arr = mask_arr_raw[:, :, 1]
+        if mask_arr.max() < 1:
+            mask_arr = mask_arr_raw[:, :, 2]
+            if mask_arr.max() < 1:
+                mask_arr = mask_arr_raw[:, :, 0]
+                if mask_arr.max() < 1:
+                    raise ("max mask value low than 1 %s %s" % (mask_dir, mask))
+        img_arr = cv2.imdecode(np.fromfile(os.path.join(img_dir, img_name), dtype=np.uint8), 1)  # imencode会自动把bgr转成rgb
 
-    img_list.append(img_arr)
-    mask_list.append(mask_arr)
-    img_list.append(ts_img)
-    mask_list.append(ts_mk)
+        ts_img = np.transpose(img_arr, axes=(1, 0, 2))
+        ts_mk = np.transpose(mask_arr, axes=(1, 0))
 
-    for num in range(len(img_list)):
-        out_img_name = "%s.jpg" % len(os.listdir(out_img_dir))
-        cv2.imencode('.jpg', img_list[num])[1].tofile(os.path.join(out_img_dir, out_img_name))
-        out_mk_name = out_img_name.replace(".jpg", '.png')
-        save_colored_mask(mask_list[num], os.path.join(out_mask_dir, out_mk_name))
+        # show_two_image(img_arr,ts_img)
+        # out_img_name = "%s.jpg" % len(os.listdir(out_img_dir))
+        # cv2.imencode('.jpg', ts_img)[1].tofile(os.path.join(out_img_dir, out_img_name))
+        # out_mk_name=out_img_name.replace(".jpg",'.png')
+        # save_colored_mask(ts_mk, os.path.join(out_mask_dir,out_mk_name))
 
-        hf_img = HorizontalFlip().apply(img_list[num])
-        hf_mk = HorizontalFlip().apply(mask_list[num])
+        img_list.append(img_arr)
+        mask_list.append(mask_arr)
+        img_list.append(ts_img)
+        mask_list.append(ts_mk)
 
-        out_img_name = "%s.jpg" % len(os.listdir(out_img_dir))
-        cv2.imencode('.jpg', hf_img)[1].tofile(os.path.join(out_img_dir, out_img_name))
-        out_mk_name = out_img_name.replace(".jpg", '.png')
-        save_colored_mask(hf_mk, os.path.join(out_mask_dir, out_mk_name))
+        for num in range(len(img_list)):
+            out_img_name = "%d.bmp" % len(os.listdir(out_img_dir))
+            cv2.imencode('.bmp', img_list[num])[1].tofile(os.path.join(out_img_dir, out_img_name))
+            out_mk_name = out_img_name.replace(".bmp", '.png')
+            save_colored_mask(mask_list[num], os.path.join(out_mask_dir, out_mk_name))
 
-        vf_img = VerticalFlip().apply(img_list[num])
-        vf_mk = VerticalFlip().apply(mask_list[num])
-        out_img_name = "%s.jpg" % len(os.listdir(out_img_dir))
-        cv2.imencode('.jpg', vf_img)[1].tofile(os.path.join(out_img_dir, out_img_name))
-        out_mk_name = out_img_name.replace(".jpg", '.png')
-        save_colored_mask(vf_mk, os.path.join(out_mask_dir, out_mk_name))
+            hf_img = HorizontalFlip().apply(img_list[num])
+            hf_mk = HorizontalFlip().apply(mask_list[num])
 
-        vh_img = HorizontalFlip().apply(vf_img)
-        vh_mk = HorizontalFlip().apply(vf_mk)
-        out_img_name = "%s.jpg" % len(os.listdir(out_img_dir))
-        cv2.imencode('.jpg', vh_img)[1].tofile(os.path.join(out_img_dir, out_img_name))
-        out_mk_name = out_img_name.replace(".jpg", '.png')
-        save_colored_mask(vh_mk, os.path.join(out_mask_dir, out_mk_name))
+            out_img_name = "%d.bmp" % len(os.listdir(out_img_dir))
+            cv2.imencode('.bmp', hf_img)[1].tofile(os.path.join(out_img_dir, out_img_name))
+            out_mk_name = out_img_name.replace(".bmp", '.png')
+            save_colored_mask(hf_mk, os.path.join(out_mask_dir, out_mk_name))
+
+            vf_img = VerticalFlip().apply(img_list[num])
+            vf_mk = VerticalFlip().apply(mask_list[num])
+            out_img_name = "%d.bmp" % len(os.listdir(out_img_dir))
+            cv2.imencode('.bmp', vf_img)[1].tofile(os.path.join(out_img_dir, out_img_name))
+            out_mk_name = out_img_name.replace(".bmp", '.png')
+            save_colored_mask(vf_mk, os.path.join(out_mask_dir, out_mk_name))
+
+            vh_img = HorizontalFlip().apply(vf_img)
+            vh_mk = HorizontalFlip().apply(vf_mk)
+            out_img_name = "%d.bmp" % len(os.listdir(out_img_dir))
+            cv2.imencode('.bmp', vh_img)[1].tofile(os.path.join(out_img_dir, out_img_name))
+            out_mk_name = out_img_name.replace(".bmp", '.png')
+            save_colored_mask(vh_mk, os.path.join(out_mask_dir, out_mk_name))
