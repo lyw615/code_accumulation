@@ -248,7 +248,9 @@ def copy_paste(mask_src, img_src, mask_main, img_main):
     rotate_list = []
     out_list = []
 
-    #
+    mask_value = list(set(mask_src.flatten()))
+    mask_value.remove(0)
+
     # mask_src_right = HorizontalFlip(p=1)(image=mask_src)
     # img_src_right= HorizontalFlip(p=1)(image=img_src)
 
@@ -257,6 +259,7 @@ def copy_paste(mask_src, img_src, mask_main, img_main):
 
         _mask = Rotate(p=1, limit=(degree, degree))(image=mask_src)["image"]
         _img = Rotate(p=1, limit=(degree, degree))(image=img_src)["image"]
+
         rotate_list.append([_mask, _img])
         # show_two_image(mask_src,_mask)
         # show_two_image(img_src,_img)
@@ -283,9 +286,17 @@ def copy_paste(mask_src, img_src, mask_main, img_main):
         img = RandomBrightnessContrast(brightness_limit=0.25, contrast_limit=0.25, p=0.7)(image=img)["image"]
         mask = img_add(_mask, mask_main, _mask)
 
-        # show_two_image(img_main,img)
-        # show_two_image(mask_main,mask)
-        out_list.append((img, mask))
+        # 过滤mask中其他非目标像素
+        filted_mask = np.zeros(shape=mask.shape)
+        for i in mask_value:
+            target_mask = (mask == i).astype(np.uint8)
+            filted_mask += target_mask * i
+
+        filted_mask = np.array(filted_mask, dtype=np.uint8)
+
+        # _ft_value=list(set(filted_mask.flatten()))
+        # print(mask_value,_ft_value)
+        out_list.append((img, filted_mask))
     return out_list
 
 
