@@ -384,8 +384,8 @@ def get_json_cls_num(json_path):
 
 
 def test_split_balance():
-    train_json_path = "/home/data1/yw/copy_paste_empty/500_aug/big_coco_split/fold_v1/train.json"
-    val_json_path = "/home/data1/yw/copy_paste_empty/500_aug/big_coco_split/fold_v1/test.json"
+    train_json_path = "/home/data1/yw/copy_paste_empty/500_aug/merged.json"
+    val_json_path = "/home/lyw/train.json"
 
     train_cls_num = get_json_cls_num(train_json_path)
     val_cls_num = get_json_cls_num(val_json_path)
@@ -394,6 +394,12 @@ def test_split_balance():
 
     print("\n")
     print(val_cls_num)
+
+
+def dowmsample_cls():
+    # 降采样某1类 coco format todo
+    json_path = r""
+    jf = json.load(open(json_path, 'r'))
 
 
 if __name__ == '__main__':
@@ -405,10 +411,10 @@ if __name__ == '__main__':
     # class_name_dict={"holothurian":0 ,"echinus": 1,"scallop": 2,"starfish": 3,"waterweeds": 4,}
     # class_name_dict = {"echinus": 1, "scallop": 2, "starfish": 3, "holothurian": 4, }
 
-    # coco_path="/home/data1/yw/copy_paste_empty/500_aug/merged.json"
-    # # coco_path="/home/data1/yw/copy_paste_empty/merged.json"
-    # folds_dir="/home/data1/yw/copy_paste_empty/500_aug/big_coco_split"
-    # # dirty_txt = r"/home/data1/yw/github_projects/personal_github/code_aculat/data_operation/image_pre_none.txt"
-    # split_train_val(coco_path,folds_dir)
+    coco_path = "/home/data1/yw/copy_paste_empty/500_aug/merged.json"
+    # coco_path="/home/data1/yw/copy_paste_empty/merged.json"
+    folds_dir = "/home/data1/yw/copy_paste_empty/500_aug/big_coco_split"
+    # dirty_txt = r"/home/data1/yw/github_projects/personal_github/code_aculat/data_operation/image_pre_none.txt"
+    split_train_val(coco_path, folds_dir)
 
-    test_split_balance()
+    # test_split_balance()

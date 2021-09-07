@@ -32,8 +32,11 @@ def show_two_image(image1, image2, title=None):
 input_dir = r"/home/data1/yw/copy_paste_empty/empty_paste_out"
 out_dir = "/home/data1/yw/copy_paste_empty/500_aug/out_paste"
 for dirname in os.listdir(input_dir):
-    if dirname in ["big_21", 'big_22']:
+    if dirname in ["big_21", 'big_22',"big_31", 'big_32']:
         continue
+
+    # if dirname not in ["big_31", 'big_32']:
+    #     continue
 
     mask_dir = os.path.join(input_dir, dirname, "SegmentationClass")
     img_dir = os.path.join(input_dir, dirname, "JPEGImages")

@@ -42,7 +42,7 @@ def main(args):
             save_colored_mask(mask, seg_output_path)
             
 def modi_main(args):
-    image_dir=r"D:\BaiduNetdiskDownload\强智杯-20210814-军舰军机-训练数据\outship_cls_num"
+    image_dir=r"/home/data1/yw/copy_paste_empty/outship_cls_num"
     for dirname in os.listdir(args.input_dir):
         input_dir=os.path.join(args.input_dir,dirname)
         single_img_dir=os.path.join(image_dir,dirname,dirname.split("_")[-1])
@@ -71,7 +71,7 @@ def modi_main(args):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input_dir", default=r"G:\empty_paste_out", type=str,
+    parser.add_argument("--input_dir", default=r"/home/data1/yw/copy_paste_empty/empty_paste_out", type=str,
                         help="coco dataset directory")
     parser.add_argument("--split", default="train", type=str,
                         help="train2017 or val2017")

@@ -60,8 +60,8 @@ def get_annos_from_mask(mask_path, image_id, cate_id, instance_id):
 
 # 自成一个coco json，然后合并两个coco
 input_dir = r"/home/data1/yw/copy_paste_empty/500_aug/out_paste"
-out_img_dir = r"/home/data1/yw/copy_paste_empty/500_aug/out_toge1"
-out_coco_path = r"/home/data1/yw/copy_paste_empty/500_aug/outcoco1.json"
+out_img_dir = r"/home/data1/yw/copy_paste_empty/500_aug/out_toge"
+out_coco_path = r"/home/data1/yw/copy_paste_empty/500_aug/outcoco.json"
 os.makedirs(out_img_dir, exist_ok=True)
 
 class_ids = {}

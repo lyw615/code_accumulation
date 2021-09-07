@@ -258,7 +258,7 @@ def copy_paste(mask_src, img_src, mask_main, img_main):
     # mask_src_right = HorizontalFlip(p=1)(image=mask_src)
     # img_src_right= HorizontalFlip(p=1)(image=img_src)
 
-    for degree in np.random.uniform(0, 360, 36):
+    for degree in np.random.uniform(0, 360,36):
         # for degree in np.random.uniform(0,360,36):
 
         _mask = Rotate(p=1, limit=(degree, degree))(image=mask_src)["image"]
@@ -375,10 +375,10 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--main_dir", default=r"/home/data1/yw/copy_paste_empty/export_bg1", type=str,
                         help="to be pasted directory")
-    parser.add_argument("--src_dir", default=r"/home/data1/yw/copy_paste_empty/empty_paste_out/big_91",
+    parser.add_argument("--src_dir", default=r"/home/data1/yw/copy_paste_empty/empty_paste_out/big_92",
                         type=str,
                         help="to be copyed directory")
-    parser.add_argument("--output_dir", default=r"/home/data1/yw/copy_paste_empty/500_aug/out_paste/big_91", type=str,
+    parser.add_argument("--output_dir", default=r"/home/data1/yw/copy_paste_empty/500_aug/out_paste/big_92", type=str,
                         help="output dataset directory")
     parser.add_argument("--lsj", default=False, type=bool, help="if use Large Scale Jittering, now not using")
     parser.add_argument("--suffix", default=".bmp", type=str, help="image format")
