@@ -1,65 +1,56 @@
 import json
 import os
 
-jf_base= json.load(open("/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/k-fold-v1/fold_v2/train.json", "r"))
-jf_add= json.load(open("/home/data1/yw/data/mmdetection_data/airport_port_det_kdxf/k-fold-v2/fold_v1/31.json", "r"))
-jf_add_anno=json.load(open('/home/data1/yw/data/iobjectspy_out/mmdetection/history_test_result/xf_result/xf_600_300_clean-f2.bbox.json'))
-filename2id_base={}
-filename2anno_base={}
+jf_base = json.load(open("/home/data1/yw/copy_paste_empty/500_aug/outcoco.json", "r"))  # bigger json file
+jf_add = json.load(open("/home/lyw/train.json", "r"))
 
-filename2id_add={}
-filename2anno_add={}
+out_json_path = "/home/data1/yw/copy_paste_empty/500_aug/merged.json"
 
-for _dict in jf_base['images']:
-    file_name=_dict['file_name']
-    filename2id_base[file_name]=_dict['id']
+# process image merge
+base_images = jf_base['images']
+add_images = jf_add['images']
+new_js_dict = {}
+start_img_id = len(base_images)
+start_obj_id = len(jf_base['annotations'])
 
+for image_dic in add_images:
+    image_dic['id'] = image_dic['id'] + start_img_id
+    base_images.append(image_dic)
 
-id2filename_base=dict(zip(filename2id_base.values(),filename2id_base.keys()))
+# process  class merge
+add_old_catid2new_dic = {
+    21: 12, 22: 12, 23: 12,
+    1: 10, 2: 11, 15: 15
+}
 
-for _dict in jf_base['annotations']:
-    if id2filename_base[_dict['image_id']] not in filename2anno_base.keys():
-        filename2anno_base[id2filename_base[_dict['image_id']]]=[]
-    filename2anno_base[id2filename_base[_dict['image_id']]].append(_dict)
+base_old_catid2new_dic = {
+    10: 10, 11: 11, 21: 12, 22: 12, 16: 16, 31: 13, 32: 13, 41: 14, 51: 15, 52: 15, 71: 17, 72: 17, 81: 18, 82: 18,
+    91: 19, 92: 19
+}
 
-for _dict in jf_add['images']:
-    file_name=_dict['file_name']
-    filename2id_add[file_name]=_dict['id']
+new_categories_dic = {"10": 10, "11": 11, "12": 12, "13": 13, "14": 14, "15": 15, "16": 16, "17": 17, "18": 18,
+                      "19": 19}
 
-id2filename_add=dict(zip(filename2id_add.values(),filename2id_add.keys()))
+new_categories = []
+for key, value in new_categories_dic.items():
+    new_categories.append({'id': value, 'name': key})
 
-new_json_id=0
-for _dict in jf_add_anno:
-    if id2filename_add[_dict['image_id']] not in filename2anno_add.keys():
-        filename2anno_add[id2filename_add[_dict['image_id']]]=[]
+# process objs merge
+base_annos = jf_base["annotations"]
+add_annos = jf_add["annotations"]
 
-    area=int(_dict['bbox'][2]*_dict['bbox'][3])
-    image_id=filename2id_base[id2filename_add[_dict['image_id']]]
-    bbox=list(map(int,_dict['bbox']))
+for anno in base_annos:
+    anno['category_id'] = base_old_catid2new_dic[anno['category_id']]
 
-    coco_format_dict={'area': area,'iscrowd': 0,'image_id':image_id ,'bbox':bbox,'category_id':_dict['category_id'] ,'id':new_json_id ,'ignore':0,'segmentation':[]}
-    filename2anno_add[id2filename_add[_dict['image_id']]].append(coco_format_dict)
-    new_json_id+=1
+for anno in add_annos:
+    anno['category_id'] = add_old_catid2new_dic[anno['category_id']]
+    anno['id'] += start_obj_id
+    anno['image_id'] += start_img_id
+    base_annos.append(anno)
 
-for filename in filename2anno_add.keys():
-    if filename in  filename2anno_base.keys():
-        filename2anno_base[filename]=filename2anno_add[filename]    #replace annotations
+# new_js_dict['type']=jf_add["type"]
+new_js_dict['images'] = base_images
+new_js_dict['annotations'] = base_annos
+new_js_dict['categories'] = new_categories
 
-dropped_img=[]
-for filename in filename2id_add:
-    if filename not in filename2anno_add.keys():
-        dropped_img.append(filename)
-
-#drop no pre from json base
-for img_dict in jf_base['images']:
-    if img_dict['file_name']  in dropped_img:
-        jf_base['images'].remove(img_dict)
-        del filename2anno_base[img_dict['file_name']]
-
-#save to json
-annotations=[]
-for filename in filename2anno_base.keys():
-    anno=filename2anno_base[filename]
-
-
-print("ok")
+json.dump(new_js_dict, open(out_json_path, 'w'))

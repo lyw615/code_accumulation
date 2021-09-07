@@ -165,15 +165,19 @@ def get_mask_bbox(mask):
     """
     获取mask中所有mask的最小外接矩形，所以如果图中多个对象分布的范围很广，那就不太好弄
     """
-    ret, thresh = cv2.threshold(mask, 1, 255, cv2.THRESH_BINARY_INV)
+    from skimage import measure
 
-    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours = measure.find_contours(mask, 0.5)
 
     bbox_list = []
-    for ct in contours:
-        if ct[2][0][0] == mask.shape[1] - 1:
-            continue
-        x, y, w, h = cv2.boundingRect(ct)
+
+    for idx in range(len(contours)):
+        contour = contours[idx]
+        contour = np.flip(contour, axis=1)
+
+        arr_seg = np.expand_dims(contour, axis=1)
+        arr_seg = np.array(arr_seg, dtype=np.int)
+        x, y, w, h = cv2.boundingRect(arr_seg)
         bbox_list.append([x, y, x + w, y + h])
 
     bbox_list = np.array(bbox_list, dtype=np.int)
@@ -254,7 +258,7 @@ def copy_paste(mask_src, img_src, mask_main, img_main):
     # mask_src_right = HorizontalFlip(p=1)(image=mask_src)
     # img_src_right= HorizontalFlip(p=1)(image=img_src)
 
-    for degree in np.random.uniform(0, 360, 2):
+    for degree in np.random.uniform(0, 360,36):
         # for degree in np.random.uniform(0,360,36):
 
         _mask = Rotate(p=1, limit=(degree, degree))(image=mask_src)["image"]
@@ -369,12 +373,12 @@ def main(args):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--main_dir", default=r"G:\背景军港\export_bg1", type=str,
+    parser.add_argument("--main_dir", default=r"/home/data1/yw/copy_paste_empty/export_bg1", type=str,
                         help="to be pasted directory")
-    parser.add_argument("--src_dir", default=r"G:\empty_paste_out\big_31",
+    parser.add_argument("--src_dir", default=r"/home/data1/yw/copy_paste_empty/empty_paste_out/big_92",
                         type=str,
                         help="to be copyed directory")
-    parser.add_argument("--output_dir", default=r"G:\empty_paste_out\big_31\out_paste", type=str,
+    parser.add_argument("--output_dir", default=r"/home/data1/yw/copy_paste_empty/500_aug/out_paste/big_92", type=str,
                         help="output dataset directory")
     parser.add_argument("--lsj", default=False, type=bool, help="if use Large Scale Jittering, now not using")
     parser.add_argument("--suffix", default=".bmp", type=str, help="image format")
