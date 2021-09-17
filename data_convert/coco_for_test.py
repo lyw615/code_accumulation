@@ -14,8 +14,10 @@ def json_from_imagedir(images_dir, annot_dst_path, train_img_source=None):
     js = {'images': [], 'annotations': [],
           # 'categories': [{'id': 1, 'name': "Airport"}, {'id': 2, 'name': "Port"}],
           # 'categories': [{'id': 1, 'name': "ship"}],
-          'categories': [{'id': 1, 'name': "23"},{'id': 2, 'name': "22"},{'id': 3, 'name': "21"},{'id': 4, 'name': "2"},{'id': 5, 'name': "1"},{'id': 6, 'name': "15"}],
-          }  # {'id': 5, 'name': "waterweeds"}
+          # 'categories': [{'id': 1, 'name': "23"},{'id': 2, 'name': "22"},{'id': 3, 'name': "21"},{'id': 4, 'name': "2"},{'id': 5, 'name': "1"},{'id': 6, 'name': "15"}],
+          'categories': [{'id': 10, 'name': "10"},{'id': 11, 'name': "11"},{'id': 12, 'name': "12"},{'id': 13, 'name': "13"},{'id': 14, 'name': "14"},
+                         {'id': 15, 'name': "15"},{'id': 16, 'name': "16"},{'id': 17, 'name': "17"},{'id': 18, 'name': "18"},{'id': 19, 'name': "19"}],
+          }
     # {"echinus": 1, "scallop": 2, "starfish": 3, "holothurian": 4}
 
     if not train_img_source:
@@ -59,8 +61,11 @@ def json_from_imagedir(images_dir, annot_dst_path, train_img_source=None):
 
 if __name__ == '__main__':
     "mmdetection need json list  as image list to be predicted"
-    train_img_source = '/home/data1/yw/data/compt_data/qzb_ship/target_img.txt'
-    train_img_source = '/home/data1/yw/data/iobjectspy_out/mmdetection/show_fine'
-    images_dir = '/home/data1/yw/data/compt_data/qzb_ship/k-fold/fold_v1/Images'
-    annot_dst_path = '/home/data1/yw/data/compt_data/qzb_ship/valid_show_fine.json'
-    json_from_imagedir(images_dir, annot_dst_path, train_img_source)
+    # train_img_source = '/home/data1/yw/data/compt_data/qzb_ship/target_img.txt'
+    # train_img_source = '/home/data1/yw/data/iobjectspy_out/mmdetection/show_fine'
+    # images_dir = '/home/data1/yw/data/compt_data/qzb_ship/k-fold/fold_v1/Images'
+    # annot_dst_path = '/home/data1/yw/data/compt_data/qzb_ship/valid_show_fine.json'
+    # json_from_imagedir(images_dir, annot_dst_path, train_img_source)
+
+    json_from_imagedir(r"/home/data1/yw/data/compt_data/qzb_data/HRSC_data/Images",
+                       "/home/data1/yw/data/compt_data/qzb_data/HRSC_data/Images/test.json")

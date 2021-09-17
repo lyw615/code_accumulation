@@ -42,9 +42,9 @@ def show_one_image(image, title=None,save_dir=None,save_name=None):
 def draw_bboxes_on_image(image_path, bboxes, class_names, title=None,save_dir=None,save_name=None):
     """
     bbox:[[xmin,ymin,xmax,ymax]] list
-
     """
-
+    # class_id2name = {10:"航母",11:"两栖",12:"驱护",13:"导弹巡逻艇",14:"扫雷舰艇",15:"登陆",16:"补给",17:"支援",18:"濒海",19:"侦察"}
+    class_id2name = {10:"hm",11:"lq",12:"qh",13:"dx",14:"sl",15:"dl",16:"bj",17:"zy",18:"bh",19:"zc"}
     if isinstance(image_path, str):
         try:
             show_img = Image.open(image_path)
@@ -69,9 +69,9 @@ def draw_bboxes_on_image(image_path, bboxes, class_names, title=None,save_dir=No
             txt_font = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
             # txt_font = "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc"
             txt_font = ImageFont.truetype(txt_font, size=20)
-            draw.text((int((bbox[0] + bbox[2]) / 2), bbox[3]), '%s' % class_name, font=txt_font)
+            draw.text((int((bbox[0] + bbox[2]) / 2), int((bbox[1]+bbox[3])/2)), '%s' % class_id2name[class_name], font=txt_font)
         else:
-            draw.text((int((bbox[0] + bbox[2]) / 2), bbox[3]), '%s' % class_name)
+            draw.text((int((bbox[0] + bbox[2]) / 2), int((bbox[1]+bbox[3])/2)), '%s' % class_name)
 
     show_one_image(np.array(show_img), title,save_dir=save_dir,save_name=save_name)
 
