@@ -20,7 +20,7 @@ def show_two_image(image1, image2, title=None):
     plt.show()
 
 
-def show_one_image(image, title=None,save_dir=None,save_name=None):
+def show_one_image(image, title=None, save_dir=None, save_name=None):
     from matplotlib import pyplot as plt
     fig = plt.figure(figsize=(10, 10))
     plt.imshow(image)
@@ -28,9 +28,9 @@ def show_one_image(image, title=None,save_dir=None,save_name=None):
     if title:
         plt.title(title)
 
-    if  save_dir:
+    if save_dir:
         os.makedirs(save_dir, exist_ok=True)
-        plt.savefig(os.path.join(save_dir,save_name))
+        plt.savefig(os.path.join(save_dir, save_name))
     else:
         plt.show()
     # outdir="/home/data1/yw/github_projects/personal_github/code_aculat/outship"
@@ -39,12 +39,12 @@ def show_one_image(image, title=None,save_dir=None,save_name=None):
     # plt.savefig(os.path.join(outdir,"%d.png"%num))
 
 
-def draw_bboxes_on_image(image_path, bboxes, class_names, title=None,save_dir=None,save_name=None):
+def draw_bboxes_on_image(image_path, bboxes, class_names, title=None, save_dir=None, save_name=None):
     """
     bbox:[[xmin,ymin,xmax,ymax]] list
     """
     # class_id2name = {10:"航母",11:"两栖",12:"驱护",13:"导弹巡逻艇",14:"扫雷舰艇",15:"登陆",16:"补给",17:"支援",18:"濒海",19:"侦察"}
-    class_id2name = {10:"hm",11:"lq",12:"qh",13:"dx",14:"sl",15:"dl",16:"bj",17:"zy",18:"bh",19:"zc"}
+    class_id2name = get_zw_from_txt("/home/data1/yw/github_projects/personal_github/code_aculat/zw.txt")
     if isinstance(image_path, str):
         try:
             show_img = Image.open(image_path)
@@ -66,14 +66,16 @@ def draw_bboxes_on_image(image_path, bboxes, class_names, title=None,save_dir=No
                        outline='red')  # (xmin,ymin) ,(xmax,ymax)
 
         if platform.system() == "Linux":
-            txt_font = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
-            # txt_font = "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc"
-            txt_font = ImageFont.truetype(txt_font, size=20)
-            draw.text((int((bbox[0] + bbox[2]) / 2), int((bbox[1]+bbox[3])/2)), '%s' % class_id2name[class_name], font=txt_font)
+            txt_font = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"  # 英文字体
+            # txt_font = "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc"   #中文字体
+            txt_font = ImageFont.truetype(txt_font, size=30)
+            draw.text((int((bbox[0] + bbox[2]) / 2), int((bbox[1] + bbox[3]) / 2)), '%s' % class_id2name[class_name],
+                      font=txt_font)
         else:
-            draw.text((int((bbox[0] + bbox[2]) / 2), int((bbox[1]+bbox[3])/2)), '%s' % class_name)
+            draw.text((int((bbox[0] + bbox[2]) / 2), int((bbox[1] + bbox[3]) / 2)), '%s' % class_name)
 
-    show_one_image(np.array(show_img), title,save_dir=save_dir,save_name=save_name)
+    # show_img.save(os.path.join(save_dir,save_name))
+    show_one_image(np.array(show_img), title, save_dir=save_dir, save_name=save_name)
 
 
 def draw_bbox(image, bbox):
@@ -146,6 +148,39 @@ def draw_multi_bboxes_with_names(image, bboxes, class_names, color=None):
             draw.text((int((bbox[0] + bbox[2]) / 2), bbox[3]), '%s' % class_name)
 
 
+def draw_multi_rotated_bboxes_with_names(image, bboxes, class_names, color=None):
+    """
+    Draw multi bounding box on image.
+    Args:
+        image (PIL.Image): a PIL Image object.
+        bbox (np.array|list|tuple): (xmin, ymin, xmax, ymax).
+    """
+    if not color:
+        color = ['red'] * len(bboxes)
+    bboxes = np.array(bboxes, dtype=np.int)
+    for _ in range(len(bboxes)):
+        bbox = bboxes[_]
+        draw = ImageDraw.Draw(image)
+        bbox0, bbox1, bbox2, bbox3 = bbox
+
+        draw.line(
+            [(bbox0[0], bbox0[1]), (bbox1[0], bbox1[1]), (bbox2[0], bbox2[1]), (bbox3[0], bbox3[1]),
+             (bbox0[0], bbox0[1])],
+            width=4,
+            fill=color[_])
+
+        class_name = class_names[_]
+
+        if platform.system() == "Linux":
+            txt_font = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
+            # txt_font = "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc"  # 中文字体
+            txt_font = ImageFont.truetype(txt_font, size=70)
+            draw.text((int((bbox0[0] + bbox2[0]) / 2), int((bbox1[1] + bbox3[1]) / 2)), '%s' % class_name,
+                      font=txt_font)
+        else:
+            draw.text((int((bbox[0] + bbox[2]) / 2), bbox[3]), '%s' % class_name)
+
+
 def show_bboxes_region(image_path, bboxes, class_names, out_dir, title=None):
     """
     bbox:[[xmin,ymin,xmax,ymax]] list
@@ -188,3 +223,16 @@ def show_bboxes_region(image_path, bboxes, class_names, out_dir, title=None):
             save_name = "%s_%s_%d.png" % (os.path.basename(image_path).split('.')[0], class_name, _)
             save_path = os.path.join(out_dir, save_name)
             plt.savefig(save_path)
+
+
+def get_zw_from_txt(txt_path):
+    with open(txt_path, 'r', encoding='utf-8') as ff:
+        record = ff.readlines()[0]
+
+    record = record.split(",")
+    key_ind = 10
+    zw_dict = {}
+    for i in record:
+        zw_dict[key_ind] = i
+        key_ind += 1
+    return zw_dict

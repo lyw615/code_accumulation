@@ -23,15 +23,18 @@ def get_image_all_ann(json_file):
     return image_name2annos
 
 
-image_dir = r"/home/data1/yw/data/compt_data/qzb_data/HRSC_data/Images"
-target_list = os.listdir("/home/data1/yw/data/compt_data/qzb_data/HRSC_data/first_select_Annotations")
-target_list = [x.split(".")[0] for x in target_list]
+image_dir = r"/home/data1/yw/data/compt_data/qzb_data/download_tif"
+# target_list = os.listdir("/home/data1/yw/data/compt_data/qzb_data/HRSC_data/first_select_Annotations")
+# target_list = [x.split(".")[0] for x in target_list]
+# target_catid = [10, 11, 12, 15]
 
-target_catid = [10, 11, 12, 15]
-save_dir = "/home/data1/yw/data/compt_data/qzb_data/HRSC_data/visual_unlabel"
+target_list = []
+target_catid = [10, 11, 12]
+
+save_dir = "/home/data1/yw/data/compt_data/qzb_data/download_tif_visual_pre"
 os.makedirs(save_dir, exist_ok=True)
 
-js = json.load(open("/home/data1/yw/data/compt_data/qzb_data/HRSC_data/merged_pre.json", 'r'))
+js = json.load(open("/home/data1/yw/data/compt_data/qzb_data/merged_download_pre.json", 'r'))
 image_name2annos = get_image_all_ann(js)
 
 for image in tqdm.tqdm(image_name2annos.keys()):
@@ -53,4 +56,4 @@ for image in tqdm.tqdm(image_name2annos.keys()):
 
             image_show = os.path.join(image_dir, image)
             draw_bboxes_on_image(image_show, image_bbox[:, :4], image_bbox[:, 4], save_dir=save_dir,
-                                 save_name=image.split('.')[0] + ".png")
+                                 save_name=image)  # save_name=image.split('.')[0] + ".png"

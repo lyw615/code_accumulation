@@ -7,18 +7,8 @@ from tqdm import tqdm
 import numpy as np
 
 
-def json_from_imagedir(images_dir, annot_dst_path, train_img_source=None):
+def json_from_imagedir(images_dir, annot_dst_path, js, train_img_source=None):
     "create json from image dir or txt/csv file ,set to train_img_source when the latter"
-
-    # {"echinus": 1,"scallop": 2,"starfish": 3,"holothurian": 4}
-    js = {'images': [], 'annotations': [],
-          # 'categories': [{'id': 1, 'name': "Airport"}, {'id': 2, 'name': "Port"}],
-          # 'categories': [{'id': 1, 'name': "ship"}],
-          # 'categories': [{'id': 1, 'name': "23"},{'id': 2, 'name': "22"},{'id': 3, 'name': "21"},{'id': 4, 'name': "2"},{'id': 5, 'name': "1"},{'id': 6, 'name': "15"}],
-          'categories': [{'id': 10, 'name': "10"},{'id': 11, 'name': "11"},{'id': 12, 'name': "12"},{'id': 13, 'name': "13"},{'id': 14, 'name': "14"},
-                         {'id': 15, 'name': "15"},{'id': 16, 'name': "16"},{'id': 17, 'name': "17"},{'id': 18, 'name': "18"},{'id': 19, 'name': "19"}],
-          }
-    # {"echinus": 1, "scallop": 2, "starfish": 3, "holothurian": 4}
 
     if not train_img_source:
         train_img_source = images_dir
@@ -67,5 +57,18 @@ if __name__ == '__main__':
     # annot_dst_path = '/home/data1/yw/data/compt_data/qzb_ship/valid_show_fine.json'
     # json_from_imagedir(images_dir, annot_dst_path, train_img_source)
 
-    json_from_imagedir(r"/home/data1/yw/data/compt_data/qzb_data/HRSC_data/Images",
-                       "/home/data1/yw/data/compt_data/qzb_data/HRSC_data/Images/test.json")
+    js = {'images': [], 'annotations': [],
+          # 'categories': [{'id': 1, 'name': "Airport"}, {'id': 2, 'name': "Port"}],
+          # 'categories': [{'id': 1, 'name': "ship"}],
+          # 'categories': [{'id': 1, 'name': "23"},{'id': 2, 'name': "22"},{'id': 3, 'name': "21"},{'id': 4, 'name': "2"},{'id': 5, 'name': "1"},{'id': 6, 'name': "15"}],
+          'categories': [{'id': 10, 'name': "10"}, {'id': 11, 'name': "11"}, {'id': 12, 'name': "12"},
+                         {'id': 13, 'name': "13"}, {'id': 14, 'name': "14"},
+                         {'id': 15, 'name': "15"}, {'id': 16, 'name': "16"}, {'id': 17, 'name': "17"},
+                         {'id': 18, 'name': "18"}, {'id': 19, 'name': "19"}],
+          }
+
+    image_dir = r"/home/data1/yw/data/iobjectspy_out/out_data"
+    image_dir = r"/home/data1/yw/data/iobjectspy_out/problem_data"
+    out_json_path = r"/home/data1/yw/data/iobjectspy_out/qzb_test_problem.json"
+
+    json_from_imagedir(image_dir, out_json_path, js)
