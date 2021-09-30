@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import cv2 as cv
+from tqdm import tqdm
 
 
 def show_two_image(image1, image2, title=None):
@@ -148,13 +149,16 @@ def draw_multi_bboxes_with_names(image, bboxes, class_names, color=None):
             draw.text((int((bbox[0] + bbox[2]) / 2), bbox[3]), '%s' % class_name)
 
 
-def draw_multi_rotated_bboxes_with_names(image, bboxes, class_names, color=None):
+def draw_multi_rotated_bboxes_with_names(image, bboxes, class_names, scores=[], color=None):
     """
     Draw multi bounding box on image.
     Args:
         image (PIL.Image): a PIL Image object.
         bbox (np.array|list|tuple): (xmin, ymin, xmax, ymax).
     """
+    class_id2name = get_zw_from_txt("/home/data1/yw/github_projects/personal_github/code_aculat/zw.txt")
+    if len(scores) < 1:
+        scores = np.zeros(shape=(len(bboxes)))
     if not color:
         color = ['red'] * len(bboxes)
     bboxes = np.array(bboxes, dtype=np.int)
@@ -173,9 +177,10 @@ def draw_multi_rotated_bboxes_with_names(image, bboxes, class_names, color=None)
 
         if platform.system() == "Linux":
             txt_font = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
-            # txt_font = "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc"  # 中文字体
+            txt_font = "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc"  # 中文字体
             txt_font = ImageFont.truetype(txt_font, size=70)
-            draw.text((int((bbox0[0] + bbox2[0]) / 2), int((bbox1[1] + bbox3[1]) / 2)), '%s' % class_name,
+            draw.text((int((bbox0[0] + bbox2[0]) / 2), int((bbox1[1] + bbox3[1]) / 2)),
+                      '%s_%f' % (class_id2name[class_name], scores[_]),
                       font=txt_font)
         else:
             draw.text((int((bbox[0] + bbox[2]) / 2), bbox[3]), '%s' % class_name)
@@ -236,3 +241,36 @@ def get_zw_from_txt(txt_path):
         zw_dict[key_ind] = i
         key_ind += 1
     return zw_dict
+
+
+def show_rotated_bbox_from_txt(txt_dir, image_dir, visual_saved_dir):
+    txt_list = os.listdir(txt_dir)
+    txt_list = list(filter(lambda x: x.endswith('.txt'), txt_list))
+    suffix = ".tif"
+    for txt in tqdm(txt_list):
+        image_path = os.path.join(image_dir, txt.split('.')[0] + suffix)
+        if not os.path.exists(image_path):
+            pass
+        img = Image.open(image_path)
+
+        with open(os.path.join(txt_dir, txt), 'r') as f:
+            records = f.readlines()
+
+        bboxes = []
+        categories = []
+        scores = []
+        for rec in records:
+            line = rec.strip('\n').split(',')
+            if len(line) == 11:  # -1 is score ,-2 is cate
+                bboxes.append(line[1:-2])
+                categories.append(int(line[-2]))
+                scores.append(float(line[-1]))
+            else:
+                bboxes.append(line[1:-1])
+                categories.append(int(line[-1]))
+        bboxes = np.array(bboxes, dtype=np.float)
+        bboxes = np.array(bboxes, dtype=np.int)
+        bboxes = np.reshape(bboxes, (len(bboxes), -1, 2))
+
+        draw_multi_rotated_bboxes_with_names(img, bboxes, categories, scores)
+        img.save(os.path.join(visual_saved_dir, txt.replace('.txt', '.png')))
