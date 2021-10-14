@@ -262,6 +262,8 @@ def show_rotated_bbox_from_txt(txt_dir, image_dir, visual_saved_dir):
         for rec in records:
             line = rec.strip('\n').split(',')
             if len(line) == 11:  # -1 is score ,-2 is cate
+                if float(line[-1]) < 0.2:
+                    continue
                 bboxes.append(line[1:-2])
                 categories.append(int(line[-2]))
                 scores.append(float(line[-1]))
