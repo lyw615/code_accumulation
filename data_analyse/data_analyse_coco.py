@@ -70,6 +70,20 @@ def analyse_obs_size_after_resized(json_path, long_short_edges):
             wh_scale = np.array(resized_wh)
             plot_points([(wh_scale[:, 0], wh_scale[:, 1])], label=shorter)
 
+def analyse_obs_size(json_path):
+    "从coco数据集中获取对象的宽高"
+
+    with open(json_path, 'r') as f:
+        jf = json.load(f)
+    ob_h_w=[]
+    for anno in jf['annotations']:
+
+        xmin, ymin, w, h = anno['bbox']
+
+        ob_h_w.append([h, w])
+
+    ob_h_w = np.array(ob_h_w)
+    plot_points([(ob_h_w[:, 0], ob_h_w[:, 1])], label='ob_h_w')
 
 def analyse_obs_ratio(json_path):
     "统计对象的ratio,长宽比"
@@ -108,3 +122,46 @@ def analyse_obs_ratio(json_path):
     ax = hw_dataframe.plot(kind='bar', color="#55aacc")
     ax.set_xticklabels(array_x, rotation=0)
     plt.show()
+
+def analyse_image_hw(json_path):
+    "统计image长宽比"
+
+    with open(json_path, 'r') as f:
+        jf = json.load(f)
+        h_w = []
+        for img in jf['images']:
+            w, h = img['width'],img['height']
+
+            h_w.append([h, w])
+    h_w = np.array(h_w)
+    plot_points([(h_w[:, 0],h_w[:, 1])], label='image_h_w')
+
+def check_annos(json_path):
+    """
+    测试annotations里面bbox和segmentation字段为空或者错误的
+    Returns:
+
+    """
+    with open(json_path, 'r') as f:
+        jf = json.load(f)
+
+        for anno in jf["annotations"]:
+            seg = anno['segmentation']
+            bbox = anno['bbox']
+
+            if len(seg) != 1:  # 不能为空，目标检测时除外
+                print(anno)
+                raise ("segmentation filed error")
+
+            if len(bbox) != 4:
+                print(anno)
+                raise ("bbox filed length error")
+
+            xmin, ymin, w, h = bbox
+            if xmin < 0 or ymin < 0:  # 左上角坐标为负
+                print(anno)
+                raise ("bbox filed value error")
+
+            if w < 1 or h < 1:  # 宽高要大于1
+                print(anno)
+                raise ("bbox filed value error")
