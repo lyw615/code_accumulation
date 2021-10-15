@@ -165,3 +165,27 @@ def check_annos(json_path):
             if w < 1 or h < 1:  # 宽高要大于1
                 print(anno)
                 raise ("bbox filed value error")
+
+def analyse_num_each_class(json_path):
+    jf=json.load(open(json_path,'r'))
+
+    obs_dict={}
+    for ann in jf['annotations']:
+        if ann['category_id'] not in obs_dict.keys():
+            obs_dict[ann['category_id']] = 0
+        obs_dict[ann['category_id']] += 1
+
+    "得到不重复的类别名称"
+    unique_name = list(obs_dict.keys())
+
+    "得到每类对象的数量"
+    unique_count = list(obs_dict.values())
+
+    "类别名称为x轴，对应的数量为y轴"
+    array_x = unique_name
+    array_y = unique_count
+
+    wh_dataframe = pd.DataFrame(array_y, columns=["obs num"])  # 实际还是调的matplotlib可视化
+    ax = wh_dataframe.plot(kind='bar', color="#55aacc")
+    ax.set_xticklabels(array_x, rotation=0)
+    plt.show()
