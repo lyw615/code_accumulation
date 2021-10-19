@@ -9,24 +9,24 @@ from code_aculat.data_analyse.data_analyse import analyse_image_wh, output_big_w
 from code_aculat.visualize.visualize_voc_xml import visualize_voc_xml,visual_large_tif_label
 
 
-xml_dir=r"/home/data1/yw/data/compt_data/CASIA-Ship/Annotations"
-xml_dir=r"/home/data1/yw/data/compt_data/qzb_data/HRSC_data/first_select_Annotations"
+xml_dir=r"H:\data_saved_dir\hangdao_data\Annotations"
+# xml_dir=r"/home/data1/yw/data/compt_data/qzb_data/HRSC_data/first_select_Annotations"
 
 # find_empty_xml(xml_dir)
 
 # analyse_image_wh(xml_dir, [], plot_type='points')
 
 
-# visualize_voc_xml(r"/home/data1/GeoAI_Data/warship_detect_HRSC/HRSC2016_part1/FullDataSet/first_select_Annotations",
-#                   r"/home/data1/GeoAI_Data/warship_detect_HRSC/HRSC2016_part1/FullDataSet/k-fold/fold_v1/Images",
-#                   image_suffix='.bmp',
-#
-#                   show_pro=1
-#                   )
+visualize_voc_xml(xml_dir,
+                  r"H:\data_saved_dir\hangdao_data\Images",
+                  image_suffix='.jpg',
+
+                  show_pro=1
+                  )
 
 # output_big_wh(r"/home/data1/GeoAI_Data/compete_unzip/train/Annotations",10000)
 
-analyse_obs_scale(xml_dir)
+# analyse_obs_scale(xml_dir)
 # analyse_obs_size_after_resized(xml_dir,[(4000,800)])
 # analyse_obs_wh(xml_dir)
 
