@@ -167,7 +167,7 @@ class labelme2coco(object):
         json.dump(self.data_coco, open(self.save_json_path, 'w'), indent=4, cls=MyEncoder)  # indent=4 ¸ü¼ÓÃÀ¹ÛÏÔÊ¾
 
 
-def convert(labelme_json_dir, outdir, fix_categories2id, portion=0.8, split_source=None, suffix=None):
+def convert(labelme_json_dir, outdir, fix_categories2id, portion=1, split_source=None, suffix=None):
     js_train_val = os.listdir(labelme_json_dir)
     random.shuffle(js_train_val)
 
@@ -201,10 +201,11 @@ def convert(labelme_json_dir, outdir, fix_categories2id, portion=0.8, split_sour
 
 def base_func():
     fix_categories2id = {"1": 1, "2": 2, "15": 3, "21": 4, "22": 5, "23": 6}  # 每次都要硬编码这个类别和id的对应关系，避免训练集和验证集的不一样
-    fix_categories2id = {"14": 14}  # 每次都要硬编码这个类别和id的对应关系，避免训练集和验证集的不一样
-    suffix = '.bmp'
-    labelme_json_dir = r"D:\BaiduNetdiskDownload\强智杯-20210814-军舰军机-训练数据\outship_cls_num\big_41\41\mask"
-    outdir = r"G:\hrsc\out_coco"
+    fix_categories2id = {"14": 14}
+    fix_categories2id = {"10": 10, "11": 11, "12": 12, "13": 13, "14": 14, "15": 15,"16": 16, "17": 17, "18": 18, "19": 19}
+    suffix = '.tif' #图片格式
+    labelme_json_dir = r"H:\bdc10020-7112-468b-801e-bbbc210568f2\train_val\mask"
+    outdir = r"H:\bdc10020-7112-468b-801e-bbbc210568f2\train_val"
     # csv_dir = r"E:\k-fold-fine\fold_v1"
     os.makedirs(outdir, exist_ok=True)
     convert(labelme_json_dir, outdir, fix_categories2id, split_source=None, suffix=suffix)
@@ -237,5 +238,5 @@ def modi_base():
 
 
 if __name__ == "__main__":
-    # base_func()
-    modi_base()
+    base_func()
+    # modi_base()

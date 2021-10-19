@@ -109,7 +109,10 @@ def draw_multi_bboxes(image, bboxes, color=None):
     for _ in range(len(bboxes)):
         bbox = bboxes[_]
         draw = ImageDraw.Draw(image)
-        xmin, ymin, xmax, ymax = bbox
+        if len(bbox)==5:
+            xmin, ymin, xmax, ymax,_cls = bbox
+        elif len(bbox)==4:
+            xmin, ymin, xmax, ymax= bbox
         (left, right, top, bottom) = (xmin, xmax, ymin, ymax)
         draw.line(
             [(left, top), (left, bottom), (right, bottom), (right, top),
