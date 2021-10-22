@@ -42,10 +42,10 @@ def down_sample_single_class():
 
     saved = image_ids[:int(len(image_ids) * save_portion)]
 
-    create_new_json_from_imageid(saved, jf, cate_id, new_json_path)
+    create_new_json_from_imageid(saved, jf, new_json_path)
 
 
-def create_new_json_from_imageid(image_id, jf, cate_id, new_json_path):
+def create_new_json_from_imageid(image_id, jf, new_json_path):
     # 给当前的image_id 进行降序排列，然后挨个生成新json里image_id的字典
     new_imgid_dict = {}
     new_img_id = 1
@@ -54,6 +54,7 @@ def create_new_json_from_imageid(image_id, jf, cate_id, new_json_path):
             new_imgid_dict[id] = new_img_id
             new_img_id += 1
 
+    all_cate_id = []
     # instance_id 也要修改
     ins_id = 1
     new_ann = []
@@ -62,6 +63,9 @@ def create_new_json_from_imageid(image_id, jf, cate_id, new_json_path):
             ann['id'] = ins_id
             ann['image_id'] = new_imgid_dict[ann['image_id']]
             new_ann.append(ann)
+
+            if ann['category_id'] not in all_cate_id:
+                all_cate_id.append(ann['category_id'])
             ins_id += 1
 
     new_img = []
@@ -70,8 +74,9 @@ def create_new_json_from_imageid(image_id, jf, cate_id, new_json_path):
             img['id'] = new_imgid_dict[img['id']]
             new_img.append(img)
 
-    new_cat = []
-    new_cat.append([{'name': '%d' % (cate_id), 'id': cate_id}])
+    new_cat = []  # 这里需要把所有出现的类别都添加上去
+    for cat in all_cate_id:
+        new_cat.append({'id': cat})
 
     new_json = {}
     new_json['images'] = new_img
@@ -83,10 +88,10 @@ def create_new_json_from_imageid(image_id, jf, cate_id, new_json_path):
 
 def resample_single_class():
     json_path = r"H:\resample_data\104_tv39_hrsc_raw_trans_copy.json"
-    # json_path=r"H:\bdc10020-7112-468b-801e-bbbc210568f2\train_val\train.json"
-    new_json_path = r"H:\resample_data\19_downsample.json"
+    json_path = r"H:\bdc10020-7112-468b-801e-bbbc210568f2\train_val\train.json"
+    new_json_path = r"H:\resample_data\15_downsample.json"
 
-    cate_id = 19  # 重采样类别id
+    cate_id = 15  # 重采样类别id
     # 把带有这类目标的图片都存到另一个json里面，然后做离线增强
 
     with open(json_path, 'r') as f:
@@ -99,7 +104,17 @@ def resample_single_class():
             if ann['image_id'] not in image_id:
                 image_id.append(ann['image_id'])
 
-    create_new_json_from_imageid(image_id, jf, cate_id, new_json_path)
+    create_new_json_from_imageid(image_id, jf, new_json_path)
+
+
+def resample_aug():
+    """
+    对json格式的数据进行增强
+    Returns:
+
+    """
+
+    pass
 
 
 def main():
