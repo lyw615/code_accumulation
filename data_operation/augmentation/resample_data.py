@@ -1,5 +1,11 @@
-import os, json
+import os, sys, json
+
+file_path = os.path.abspath(__file__)
+sys.path.append(os.path.abspath(os.path.join(file_path, "..", "..", "..", "..")))
+from code_aculat.visualize.visual_base import show_two_image
+
 import numpy as np
+import cv2
 
 
 def stastic_single_class_images(json_path, cate_id):
@@ -109,17 +115,89 @@ def resample_single_class():
 
 def resample_aug():
     """
-    对json格式的数据进行增强
+    对VOC格式的数据进行增强
     Returns:
 
     """
+    from albumentations import Rotate, CenterCrop
+    import cv2
 
-    pass
+    # 旋转、像素增强、mosaic增强
+    data_dir = r"H:\resample_data"
+
+    image_dir = os.path.join(data_dir, 'JPEGImages')
+    seg_dir = os.path.join(data_dir, 'SegmentationClass')
+
+    for img in os.listdir(image_dir):
+        img_path = os.path.join(image_dir, img)
+        mask_path = os.path.join(seg_dir, img.split('.')[0] + '.png')
+
+        image_arr = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), 1)
+        seg_arr = cv2.imdecode(np.fromfile(mask_path, dtype=np.uint8), 1)
+
+        mask_arr = seg_arr[:, :, 1]  # 避免得到mask里空白的channel
+        if mask_arr.max() < 1:
+            mask_arr = seg_arr[:, :, 2]
+            if mask_arr.max() < 1:
+                mask_arr = seg_arr[:, :, 0]
+                if mask_arr.max() < 1:
+                    raise ("max mask value low than 1 %s" % (mask_path))
+        # 多次的旋转增强
+        rotate_list = np.random.choice([x * 15 for x in range(1, 20)], 3)
+        for degree in rotate_list:
+            rota_img = Rotate(limit=(degree, degree), p=1)(image=image_arr)['image']
+            rota_mask = Rotate(limit=(degree, degree), p=1)(image=mask_arr)['image']
+            show_two_image(rota_img, rota_mask)
+            print('ok')
+
+
+def shift_move():
+    image_dir = r'H:\resample_data\JPEGImages'
+    out_dir = os.path.join(os.path.dirname(image_dir), "shift_move")
+    os.makedirs(out_dir)
+
+    # 左右、上下平移
+    # a为平移的尺度,这里设置为10.
+    move_stride = 50
+
+    for img_name in os.listdir(image_dir):
+        img_path = os.path.join(image_dir, img_name)
+
+        img = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), 1)
+
+        size = img.shape[:2]
+        img1 = img
+        img2 = img
+        img3 = img
+        img4 = img
+        img1 = np.concatenate((img1[:, move_stride:], img1[:, :move_stride]), axis=1)  # 左
+
+        cv2.imencode('.%s' % img_name.split('.')[-1], img1)[1]. \
+            tofile(os.path.join(out_dir, '%s' % (img_name.split('.')[0] + '_left.png')))
+
+        img2 = np.concatenate((img2[:, size[1] - move_stride:], img2[:, :size[1] - move_stride]), axis=1)  # 右
+        cv2.imencode('.%s' % img_name.split('.')[-1], img2)[1]. \
+            tofile(os.path.join(out_dir, '%s' % (img_name.split('.')[0] + '_right.png')))
+
+        img3 = np.concatenate((img3[move_stride:, :], img3[:move_stride, :]), axis=0)  # 上
+        cv2.imencode('.%s' % img_name.split('.')[-1], img3)[1]. \
+            tofile(os.path.join(out_dir, '%s' % (img_name.split('.')[0] + '_up.png')))
+
+        img4 = np.concatenate((img4[size[0] - move_stride:, :], img4[:size[0] - move_stride, :]), axis=0)  # 下
+        cv2.imencode('.%s' % img_name.split('.')[-1], img4)[1]. \
+            tofile(os.path.join(out_dir, '%s' % (img_name.split('.')[0] + '_bottom.png')))
+        if np.random.randint(1, 10) > 7:
+            show_two_image(img, img1, 'left')
+            show_two_image(img, img2, 'right')
+            show_two_image(img, img3, 'up')
+            show_two_image(img, img4, 'bot')
 
 
 def main():
     # down_sample_single_class()
-    resample_single_class()
+    # resample_single_class()
+    # resample_aug()e
+    shift_move()
 
 
 main()

@@ -80,7 +80,7 @@ def get_args():
 
 
 if __name__ == '__main__':
-    # 从coco的点集里解析出mask，将多个mask以非零数组的方式叠加到图上
+    # 从coco的点集里解析出mask，将多个mask以非零数组的方式叠加到图上,即生成VOC格式的mask
     args = get_args()
     main(args)
     # modi_main(args)
