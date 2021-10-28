@@ -201,10 +201,12 @@ def convert(labelme_json_dir, outdir, fix_categories2id, portion=1, split_source
 
 def base_func():
     fix_categories2id = {"1": 1, "2": 2, "15": 3, "21": 4, "22": 5, "23": 6}  # 每次都要硬编码这个类别和id的对应关系，避免训练集和验证集的不一样
+
     fix_categories2id = {"14": 14}  # 每次都要硬编码这个类别和id的对应关系，避免训练集和验证集的不一样
     fix_categories2id = {"10": 10, "11": 11, "12": 12, "13": 13, "14": 14, "15": 15, "16": 16, "17": 17, "18": 18,
                          "19": 19}
     suffix = '.jpg'
+
     labelme_json_dir = r"H:\bdc10020-7112-468b-801e-bbbc210568f2\train_val\mask"
     outdir = r"H:\bdc10020-7112-468b-801e-bbbc210568f2\train_val"
     # csv_dir = r"E:\k-fold-fine\fold_v1"
