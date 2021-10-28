@@ -70,20 +70,21 @@ def analyse_obs_size_after_resized(json_path, long_short_edges):
             wh_scale = np.array(resized_wh)
             plot_points([(wh_scale[:, 0], wh_scale[:, 1])], label=shorter)
 
+
 def analyse_obs_size(json_path):
     "从coco数据集中获取对象的宽高"
 
     with open(json_path, 'r') as f:
         jf = json.load(f)
-    ob_h_w=[]
+    ob_h_w = []
     for anno in jf['annotations']:
-
         xmin, ymin, w, h = anno['bbox']
 
         ob_h_w.append([h, w])
 
     ob_h_w = np.array(ob_h_w)
     plot_points([(ob_h_w[:, 0], ob_h_w[:, 1])], label='ob_h_w')
+
 
 def analyse_obs_ratio(json_path):
     "统计对象的ratio,长宽比"
@@ -123,6 +124,7 @@ def analyse_obs_ratio(json_path):
     ax.set_xticklabels(array_x, rotation=0)
     plt.show()
 
+
 def analyse_image_hw(json_path):
     "统计image长宽比"
 
@@ -130,11 +132,12 @@ def analyse_image_hw(json_path):
         jf = json.load(f)
         h_w = []
         for img in jf['images']:
-            w, h = img['width'],img['height']
+            w, h = img['width'], img['height']
 
             h_w.append([h, w])
     h_w = np.array(h_w)
-    plot_points([(h_w[:, 0],h_w[:, 1])], label='image_h_w')
+    plot_points([(h_w[:, 0], h_w[:, 1])], label='image_h_w')
+
 
 def check_annos(json_path):
     """
@@ -166,26 +169,54 @@ def check_annos(json_path):
                 print(anno)
                 raise ("bbox filed value error")
 
-def analyse_num_each_class(json_path):
-    jf=json.load(open(json_path,'r'))
 
-    obs_dict={}
+def analyse_num_each_class(json_path):
+    jf = json.load(open(json_path, 'r'))
+
+    obs_dict = {}
     for ann in jf['annotations']:
         if ann['category_id'] not in obs_dict.keys():
             obs_dict[ann['category_id']] = 0
         obs_dict[ann['category_id']] += 1
 
-    "得到不重复的类别名称"
-    unique_name = list(obs_dict.keys())
+    show_bar(obs_dict, title="ob_num_each_class")
+
+
+def show_bar(key_num_dic, title=None):
+    "对{key:value}形式的输入，做统计直方图，title是标题"
+    unique_name = list(key_num_dic.keys())
 
     "得到每类对象的数量"
-    unique_count = list(obs_dict.values())
+    unique_count = list(key_num_dic.values())
 
     "类别名称为x轴，对应的数量为y轴"
     array_x = unique_name
     array_y = unique_count
 
-    wh_dataframe = pd.DataFrame(array_y, columns=["obs num"])  # 实际还是调的matplotlib可视化
+    wh_dataframe = pd.DataFrame(array_y, columns=[title])  # 实际还是调的matplotlib可视化
     ax = wh_dataframe.plot(kind='bar', color="#55aacc")
     ax.set_xticklabels(array_x, rotation=0)
     plt.show()
+
+
+def stastic_ann_per_image(json_path):
+    from pycocotools.coco import COCO
+
+    coco = COCO(json_path)
+
+    imgids2num_ann = {}
+    img_ids = coco.getImgIds()
+    for im_id in img_ids:
+        num_ann = len(coco.getAnnIds(imgIds=im_id))
+        if num_ann > 10:
+            print(coco.loadImgs(im_id))
+        imgids2num_ann[im_id] = num_ann
+
+    stastic_num = {}
+    for key, value in imgids2num_ann.items():
+        if value not in stastic_num:
+            stastic_num[value] = 0
+
+        stastic_num[value] += 1
+
+    show_bar(stastic_num, title="ob_num_per_image")

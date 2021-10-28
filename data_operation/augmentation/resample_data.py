@@ -98,7 +98,7 @@ def resample_single_class():
     new_json_path = r"H:\resample_data\15_downsample.json"
 
     cate_id = 15  # 重采样类别id
-    # 把带有这类目标的图片都存到另一个json里面，然后做离线增强
+
 
     with open(json_path, 'r') as f:
         jf = json.load(f)
@@ -110,7 +110,12 @@ def resample_single_class():
             if ann['image_id'] not in image_id:
                 image_id.append(ann['image_id'])
 
-    create_new_json_from_imageid(image_id, jf, new_json_path)
+    # 把带有这类目标的image_id都存到另一个txt里面，然后做copy-paste,得到的数据都存在另一个json里
+    new_txt_path=os.path.join(json_path.replace('.json','.txt'))
+    with open(new_txt_path,'w') as f:
+        f.writelines(image_id)
+
+    # create_new_json_from_imageid(image_id, jf, new_json_path)
 
 
 def resample_aug():
@@ -196,7 +201,7 @@ def shift_move():
 def main():
     # down_sample_single_class()
     # resample_single_class()
-    # resample_aug()e
+    # resample_aug()
     shift_move()
 
 
