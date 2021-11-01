@@ -94,11 +94,10 @@ def create_new_json_from_imageid(image_id, jf, new_json_path):
 
 def resample_single_class():
     json_path = r"H:\resample_data\104_tv39_hrsc_raw_trans_copy.json"
-    json_path = r"H:\bdc10020-7112-468b-801e-bbbc210568f2\train_val\train.json"
-    new_json_path = r"H:\resample_data\15_downsample.json"
+    json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/104_tv39_hrsc.json"
+    new_txt_path = os.path.join(json_path.replace('.json', '.txt'))
 
-    cate_id = 15  # 重采样类别id
-
+    cate_id = 18  # 重采样类别id
 
     with open(json_path, 'r') as f:
         jf = json.load(f)
@@ -111,9 +110,9 @@ def resample_single_class():
                 image_id.append(ann['image_id'])
 
     # 把带有这类目标的image_id都存到另一个txt里面，然后做copy-paste,得到的数据都存在另一个json里
-    new_txt_path=os.path.join(json_path.replace('.json','.txt'))
-    with open(new_txt_path,'w') as f:
-        f.writelines(image_id)
+    with open(new_txt_path, 'w') as f:
+        for id in image_id:
+            f.write("%d\n" % id)
 
     # create_new_json_from_imageid(image_id, jf, new_json_path)
 
@@ -200,9 +199,9 @@ def shift_move():
 
 def main():
     # down_sample_single_class()
-    # resample_single_class()
+    resample_single_class()
     # resample_aug()
-    shift_move()
+    # shift_move()
 
 
 main()

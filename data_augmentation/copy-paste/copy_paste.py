@@ -27,13 +27,44 @@ def mask_copy_paste(mask, paste_mask, alpha):
     raise NotImplementedError
 
 
+def show_two_image(image1, image2, title=None):
+    # 同时可视化两个RGB或者mask
+    from matplotlib import pyplot as plt
+    fig = plt.figure(figsize=(10, 10))
+    ax1 = plt.subplot(1, 2, 1)
+    ax2 = plt.subplot(1, 2, 2)
+    plt.sca(ax1)
+    plt.imshow(image1)
+    plt.sca(ax2)
+    plt.imshow(image2)
+    if title:
+        plt.title(title)
+    plt.show()
+
+
 def masks_copy_paste(masks, paste_masks, alpha):
     if alpha is not None:
         # eliminate pixels that will be pasted over
-        masks = [
-            np.logical_and(mask, np.logical_xor(mask, alpha)).astype(np.uint8) for mask in masks
-        ]
-        masks.extend(paste_masks)
+        # change the alpha to accept any size paste mask
+        # show_two_image(alpha,paste_masks)
+        # masks = [
+        #     np.logical_and(mask, np.logical_xor(mask, alpha)).astype(np.uint8) for mask in masks  #just like image ,left-up overlap,masks are in the overlap
+        # ]
+        # masks.extend(paste_masks)
+
+        row, col = alpha.shape[:2]
+        for mask in masks:
+            portion_mask = mask[:row, :col]
+            portion_mask = np.logical_and(portion_mask, np.logical_xor(portion_mask, alpha)).astype(np.uint8)
+            mask[:row, :col] = portion_mask
+
+        new_paste_masks = []
+        for p_mask in paste_masks:
+            zero_mask = np.zeros_like(masks[0], dtype=np.uint8)
+            zero_mask[:row, :col] = p_mask
+            new_paste_masks.append(zero_mask)
+
+        masks.extend(new_paste_masks)
 
     return masks
 
@@ -65,7 +96,7 @@ def bboxes_copy_paste(bboxes, paste_bboxes, masks, paste_masks, alpha, key):
     if key == 'paste_bboxes':
         return bboxes
     elif paste_bboxes is not None:
-        masks = masks_copy_paste(masks, paste_masks=[], alpha=alpha)
+        # masks = masks_copy_paste(masks, paste_masks=[], alpha=alpha)  #个人觉得多余,还会抹去paste上去的mask
         adjusted_bboxes = extract_bboxes(masks)
 
         # only keep the bounding boxes for objects listed in bboxes
@@ -79,7 +110,7 @@ def bboxes_copy_paste(bboxes, paste_bboxes, masks, paste_masks, alpha, key):
             max_mask_index = len(masks)
         else:
             max_mask_index = 0
-
+        # 从mask里提取bbox后, 把对应的类别id也加上去
         paste_mask_indices = [max_mask_index + ix for ix in range(len(paste_bboxes))]
         paste_bboxes = [pbox[:-1] + (pmi,) for pbox, pmi in zip(paste_bboxes, paste_mask_indices)]
         adjusted_paste_bboxes = extract_bboxes(paste_masks)
@@ -282,9 +313,9 @@ def get_mask_bbox(mask):
 
 
 def checkout_paste_bbox(row, column, paste_img_data):
-    # 首先需要确定paste是不是小于copy的，不然的话也要重新;
+    # 首先需要确定paste是不是小于copy的，不然的话也要重新;可只取mask部分
     # 然后才是对bbox是否越界进行判定
-    if paste_img_data['images'].shape[0] > row or paste_img_data['images'].shape[1] > column:
+    if paste_img_data['image'].shape[0] > row or paste_img_data['image'].shape[1] > column:
         return None
 
     bboxes = np.array(paste_img_data['bboxes'])
@@ -392,7 +423,7 @@ def copy_paste_class(dataset_class):
             while True:
 
                 # 从尾类图片中选取一张，粘贴到copy图片上
-                paste_idx = get_paste_index()
+                paste_idx, paste_num = get_paste_index()
                 paste_img_data = self.load_example(paste_idx)
 
                 # 这里没有缩放，是直接把两个图叠加到一起的，所以会有一些paste图片的bbox超过copy图片
@@ -402,7 +433,7 @@ def copy_paste_class(dataset_class):
                     break
 
                 loop_num += 1
-                if loop_num == len(copy_indexs):  # 避免在这里找不到合适的图片，造成死循环
+                if loop_num == paste_num:  # 避免在这里找不到合适的图片，造成死循环
                     raise ("there is no target image")
 
             for k in list(paste_img_data.keys()):
@@ -422,10 +453,12 @@ def copy_paste_class(dataset_class):
 
 
 def get_paste_index():
-    txt_path = r""
+    ""
+    txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/104_tv39_hrsc.txt"
     with open(txt_path, 'r') as f:
         copy_indexs = f.readlines()
-    copy_indexs = [x.strip('\n') for x in copy_indexs]
-    index = copy_indexs[random.randint(0, len(copy_indexs))]
+    copy_indexs = [int(x.strip('\n')) for x in copy_indexs]
+    random_id = random.randint(0, len(copy_indexs) - 1)
+    index = copy_indexs[random_id]
 
-    return index
+    return index, len(copy_indexs)

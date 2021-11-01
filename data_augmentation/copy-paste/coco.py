@@ -1,4 +1,7 @@
-import os
+import os, sys
+
+file_path = os.path.abspath(__file__)
+sys.path.append(os.path.abspath(os.path.dirname(file_path)))
 import cv2
 from torchvision.datasets import CocoDetection
 from copy_paste import copy_paste_class
@@ -62,7 +65,10 @@ class CocoDetectionCP(CocoDetection):
 
         path = self.coco.loadImgs(img_id)[0]['file_name']
         print(path)
-        image = cv2.imdecode(np.fromfile(os.path.join(self.root, path), dtype=np.uint8), flags=-1)
+        # todo delete the two line
+        if not os.path.exists(os.path.join(self.root, path)):
+            path = path.split('.')[0] + ".jpg"
+        image = cv2.imdecode(np.fromfile(os.path.join(self.root, path), dtype=np.uint8), flags=1)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         # convert all of the target segmentations to masks
