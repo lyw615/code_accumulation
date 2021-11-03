@@ -59,12 +59,17 @@ class CocoDetectionCP(CocoDetection):
 
     def load_example(self, index):
         import numpy as np
-        img_id = self.ids[index]
+
+        img_info = self.coco.loadImgs(index)[0]
+        if img_info['id'] != index:  # 判断index和image_id是否一致
+            raise ("error index {} with image_id {}".format(index, img_info['id']))
+
+        img_id = index
         ann_ids = self.coco.getAnnIds(imgIds=img_id)
         target = self.coco.loadAnns(ann_ids)
 
         path = self.coco.loadImgs(img_id)[0]['file_name']
-        print(path)
+        # print(index)
         # todo delete the two line
         if not os.path.exists(os.path.join(self.root, path)):
             path = path.split('.')[0] + ".jpg"

@@ -71,6 +71,10 @@ def masks_copy_paste(masks, paste_masks, alpha):
 
 def extract_bboxes(masks):
     bboxes = []
+    # allow for cases of no mask
+    if len(masks) == 0:
+        return bboxes
+
     h, w = masks[0].shape
     for mask in masks:
         yindices = np.where(np.any(mask, axis=0))[0]
@@ -313,32 +317,47 @@ def get_mask_bbox(mask):
 
 
 def checkout_paste_bbox(row, column, paste_img_data):
-    # 首先需要确定paste是不是小于copy的，不然的话也要重新;可只取mask部分
-    # 然后才是对bbox是否越界进行判定
     if paste_img_data['image'].shape[0] > row or paste_img_data['image'].shape[1] > column:
-        return None
+        paste_img_data = resize_image_mask_bbox(row, column, paste_img_data)
 
-    bboxes = np.array(paste_img_data['bboxes'])
-    bboxes[:, 2] += bboxes[:, 0]
-    bboxes[:, 3] += bboxes[:, 1]
-    row_index = np.where(bboxes[:, 3] > row)[0]
-    col_index = np.where(bboxes[:, 2] > column)[0]
+    # 把非稀有类别从paste里过滤
+    bboxes = np.array(paste_img_data['bboxes'], dtype=np.int)
+    cate_ids, indexs = bboxes[:, -2], bboxes[:, -1]
 
-    drop_index = np.concatenate((row_index, col_index), axis=0)
-    np.unique(drop_index)
+    target_catid = [13, 14, 17, 18, 19]
 
-    for i in range(len(drop_index)):
-        paste_img_data['masks'].pop(drop_index[i])
-        paste_img_data['bboxes'].pop(drop_index[i])
+    save_indexs = []
+    for cat, ind in zip(cate_ids, indexs):
+        if cat in target_catid:
+            save_indexs.append(ind)
 
-    if len(drop_index) == 0:
-        return paste_img_data
-    elif len(paste_img_data['bboxes']) == 0:
-        return None
-    else:
-        for n in range(len(paste_img_data['bboxes'])):
-            paste_img_data['bboxes'][n][-1] = n
-        return paste_img_data
+    new_masks = []
+    new_bboxes = []
+    for ind, box_ind in zip(save_indexs, range(len(save_indexs))):
+        new_masks.append(paste_img_data['masks'][ind])
+        new_bboxes.append(paste_img_data['bboxes'][ind][:5] + [box_ind])
+
+    paste_img_data['bboxes'] = new_bboxes
+    paste_img_data['masks'] = new_masks
+
+    return paste_img_data
+
+
+def resize_image_mask_bbox(row, column, paste_img_data):
+    p_row, p_col = paste_img_data['image'].shape[:2]
+    ratio = min(column / p_col, row / p_row) - 0.0001
+    paste_img_data['image'] = cv2.resize(paste_img_data['image'],
+                                         (int(ratio * p_col), int(ratio * p_row)))  # resize image
+
+    for mask_id in range(len(paste_img_data['masks'])):  # resize masks
+        paste_img_data['masks'][mask_id] = cv2.resize(paste_img_data['masks'][mask_id],
+                                                      (int(ratio * p_col), int(ratio * p_row)))
+
+    for box_id in range(len(paste_img_data['bboxes'])):  # resize bboxes
+        paste_img_data['bboxes'][box_id] = [int(x * ratio) for x in paste_img_data['bboxes'][box_id][:4]] + \
+                                           [int(x) for x in paste_img_data['bboxes'][box_id][4:]]
+
+    return paste_img_data
 
 
 def copy_paste_class(dataset_class):
@@ -419,22 +438,14 @@ def copy_paste_class(dataset_class):
 
         img_data = self.load_example(idx)
         if self.copy_paste is not None:
-            loop_num = 0
-            while True:
 
-                # 从尾类图片中选取一张，粘贴到copy图片上
-                paste_idx, paste_num = get_paste_index()
-                paste_img_data = self.load_example(paste_idx)
+            # 从尾类图片中选取一张，粘贴到copy图片上
+            paste_idx, paste_num = get_paste_index()
+            paste_img_data = self.load_example(paste_idx)
 
-                # 这里没有缩放，是直接把两个图叠加到一起的，所以会有一些paste图片的bbox超过copy图片
-                paste_img_data = checkout_paste_bbox(img_data['image'].shape[0], img_data['image'].shape[1],
-                                                     paste_img_data)
-                if paste_img_data is not None:
-                    break
-
-                loop_num += 1
-                if loop_num == paste_num:  # 避免在这里找不到合适的图片，造成死循环
-                    raise ("there is no target image")
+            # 这里没有缩放，是直接把两个图叠加到一起的，所以会有一些paste图片的bbox超过copy图片
+            paste_img_data = checkout_paste_bbox(img_data['image'].shape[0], img_data['image'].shape[1],
+                                                 paste_img_data)
 
             for k in list(paste_img_data.keys()):
                 paste_img_data['paste_' + k] = paste_img_data[k]
@@ -454,7 +465,7 @@ def copy_paste_class(dataset_class):
 
 def get_paste_index():
     ""
-    txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/104_tv39_hrsc.txt"
+    txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/hrsc605.txt"
     with open(txt_path, 'r') as f:
         copy_indexs = f.readlines()
     copy_indexs = [int(x.strip('\n')) for x in copy_indexs]

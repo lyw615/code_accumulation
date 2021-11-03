@@ -1,4 +1,4 @@
-import cv2, os, sys
+import cv2, os, sys, json
 import numpy as np
 
 file_path = os.path.abspath(__file__)
@@ -10,6 +10,8 @@ import albumentations as A
 import random
 from matplotlib import pyplot as plt
 from pycocotools.coco import COCO
+from pycocotools import mask as maskUtils
+from tqdm import tqdm
 
 
 def show_two_image(image1, image2, title=None):
@@ -27,9 +29,18 @@ def show_two_image(image1, image2, title=None):
     plt.show()
 
 
-json_path = r'/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/104_tv39_hrsc.json'
+class MyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, bytes):
+            return str(obj, encoding='utf-8');
+        return json.JSONEncoder.default(self, obj)
+
+
+json_path = r'/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/hrsc605.json'
 coco = COCO(json_path)
-txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/104_tv39_hrsc.txt"
+txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/hrsc605.txt"
 with open(txt_path, 'r') as f:
     txt_indexs = f.readlines()
 txt_indexs = [int(x.strip('\n')) for x in txt_indexs]
@@ -42,16 +53,24 @@ transform = A.Compose([
     # A.PadIfNeeded(256, 256, border_mode=0), #pads with image in the center, not the top left like the paper
     # A.RandomCrop(256, 256),
     CopyPaste(blend=True, sigma=1, pct_objects_paste=1, p=1.)  # 这张图中复制对象的比例
-], bbox_params=A.BboxParams(format="coco", min_visibility=1)
+], bbox_params=A.BboxParams(format="coco", min_visibility=0.8)
 )
 
 data = CocoDetectionCP(
     r'/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Images', json_path, transform
 )
 
+im_start_ind = 1
+instance_start_id = 1
+image_out_dir = "/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/new_imgs"
+json_save_path = os.path.join(os.path.dirname(json_path), 'new_%s' % os.path.basename(json_path))
+image_list = []
+ann_list = []
+
 copy_num = 5
 catIds = coco.getCatIds()
-for n in range(copy_num):
+for n in tqdm(range(copy_num)):
+
     loop_num = 0
     # 这里选一张实例数量比较少的长类图片,经过统计，选3
     while True:
@@ -76,9 +95,63 @@ for n in range(copy_num):
     bboxes = img_data['bboxes']
 
     # 将这些增强后的结果存入新的json
+    new_image_name = "cp_%d.jpg" % (im_start_ind + n)
+    # cv2.imencode only operates on bgr format image
+    cv2.imencode('.%s' % new_image_name.split('.')[-1], image[..., ::-1])[1].tofile(
+        os.path.join(image_out_dir, new_image_name))
 
-    mask_zero = np.zeros(shape=image.shape[:2])
-    for i in range(len(masks)):
-        mask_zero += masks[i]
-    show_two_image(image, mask_zero)
-    print("ok")
+    image_list.append(
+        {'height': image.shape[0], 'width': image.shape[1], 'id': im_start_ind + n, 'file_name': new_image_name})
+    from skimage import measure
+
+    for instance_id in range(len(bboxes)):
+        contours = measure.find_contours(masks[instance_id], 0.5)
+        if len(contours) > 1:
+            polygons = []
+            for contour in contours:
+                if len(contour) < 50:
+                    continue
+                _contour = np.flip(contour, axis=1)
+                polygons.append(contour.ravel().tolist())
+
+            mask_row, mask_col = masks[instance_id].shape[:2]
+            rles = maskUtils.frPyObjects(polygons, mask_row, mask_col)
+            segmentation = maskUtils.merge(rles)
+
+            # #convert rle to bina-mask
+            # conv_mask=maskUtils.decode(segmentation)    #因为之前flip,所以转成bina-mask后也要flip
+            # show_two_image(masks[instance_id],conv_mask)
+        else:
+            try:
+                contours = np.flip(contours, axis=1)
+            except Exception as e:
+                show_two_image(masks[instance_id], masks[instance_id])
+                raise e
+            segmentation = contours.ravel().tolist()
+
+        instance_dict = {
+            'segmentation': segmentation,
+            'iscrowd': 0,
+            'image_id': im_start_ind + n,
+            'bbox': bboxes[instance_id][:4],
+            'area': int(bboxes[instance_id][2] * bboxes[instance_id][3]),
+            'category_id': bboxes[instance_id][-2],
+            'id': instance_start_id
+        }
+        ann_list.append(instance_dict)
+        instance_start_id += 1
+
+    # mask_zero = np.zeros(shape=image.shape[:2])
+    # for i in range(len(masks)):
+    #     mask_zero += masks[i]
+    # show_two_image(image, mask_zero)
+    # print("ok")
+
+with open(json_path, 'r') as f:
+    jf = json.load(f)
+    cate_list = jf['categories']
+
+new_coco_json = {'images': image_list, 'annotations': ann_list, 'categories': cate_list}
+
+with open(json_save_path, 'w') as  f:
+    json.dump(new_coco_json, f, cls=MyEncoder)

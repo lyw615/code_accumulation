@@ -94,7 +94,7 @@ def create_new_json_from_imageid(image_id, jf, new_json_path):
 
 def resample_single_class():
     json_path = r"H:\resample_data\104_tv39_hrsc_raw_trans_copy.json"
-    json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/104_tv39_hrsc.json"
+    json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/hrsc605.json"
     new_txt_path = os.path.join(json_path.replace('.json', '.txt'))
 
     cate_id = 18  # 重采样类别id
