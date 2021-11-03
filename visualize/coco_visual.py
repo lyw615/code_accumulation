@@ -11,8 +11,8 @@ from matplotlib import pyplot as plt
 
 
 def cocotools_visual():
-    image_dir = r"/home/data1/competition/data/qzb_test/worldview05m_test/ship_test"
-    anno_json_path = r"/home/data1/yw/data/iobjectspy_out/pred_ship_test_1.json"
+    image_dir = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/new_imgs"
+    anno_json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/new_hrsc605.json"
     # plt_save_dir="/home/data1/yw/data/iobjectspy_out/coco_visual_show"
     # os.makedirs(plt_save_dir)
     coco = COCO(anno_json_path)
@@ -43,7 +43,8 @@ def draw_rotated_visual():
 
 
 def main():
-    draw_rotated_visual()
+    # draw_rotated_visual()
+    cocotools_visual()
 
 
 main()

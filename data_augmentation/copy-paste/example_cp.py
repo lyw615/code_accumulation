@@ -63,16 +63,19 @@ data = CocoDetectionCP(
 im_start_ind = 1
 instance_start_id = 1
 image_out_dir = "/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/new_imgs"
+os.makedirs(image_out_dir, exist_ok=True)
+
 json_save_path = os.path.join(os.path.dirname(json_path), 'new_%s' % os.path.basename(json_path))
 image_list = []
 ann_list = []
 
-copy_num = 5
+copy_num = 25
+long_class_id = 12
 catIds = coco.getCatIds()
 for n in tqdm(range(copy_num)):
 
     loop_num = 0
-    # 这里选一张实例数量比较少的长类图片,经过统计，选3
+    # 这里选一张实例数量比较少的尾类图片,经过统计，选3
     while True:
         index = copy_indexs[random.randint(0, len(copy_indexs) - 1)]
         img_info = coco.loadImgs(index)[0]
@@ -80,7 +83,8 @@ for n in tqdm(range(copy_num)):
             raise ("error index {} with image_id {}".format(index, img_info['id']))
 
         annIds = coco.getAnnIds(imgIds=img_info['id'])
-        if len(annIds) < 4 and len(annIds) > 0:
+        anns = np.array([ann['category_id'] for ann in coco.loadAnns(annIds)], dtype=np.int)
+        if len(annIds) < 5 and len(annIds) > 0 and len(np.where(anns == long_class_id)[0]) < 2:
             break
 
         loop_num += 1
@@ -106,12 +110,17 @@ for n in tqdm(range(copy_num)):
 
     for instance_id in range(len(bboxes)):
         contours = measure.find_contours(masks[instance_id], 0.5)
+        fortran_bina = np.asfortranarray(masks[instance_id])
+        encoded_bina = maskUtils.encode(fortran_bina)
+        bina_area = int(maskUtils.area(encoded_bina))  # more accuracy
+        bina_bbox = maskUtils.toBbox(encoded_bina)
+
         if len(contours) > 1:
             polygons = []
             for contour in contours:
                 if len(contour) < 50:
                     continue
-                _contour = np.flip(contour, axis=1)
+                contour = np.flip(contour, axis=1)  # 为了让坐标排列顺序由y,x,y,x变成x,y,x,y
                 polygons.append(contour.ravel().tolist())
 
             mask_row, mask_col = masks[instance_id].shape[:2]
@@ -123,18 +132,18 @@ for n in tqdm(range(copy_num)):
             # show_two_image(masks[instance_id],conv_mask)
         else:
             try:
-                contours = np.flip(contours, axis=1)
+                contours = np.flip(contours[0], axis=1)  # must be contours[0]
             except Exception as e:
                 show_two_image(masks[instance_id], masks[instance_id])
                 raise e
-            segmentation = contours.ravel().tolist()
+            segmentation = [contours.ravel().tolist()]  # polygon是 list, rle不是list
 
         instance_dict = {
-            'segmentation': segmentation,
+            'segmentation': segmentation,  # for polygon  [[x,y,x,y]]
             'iscrowd': 0,
             'image_id': im_start_ind + n,
-            'bbox': bboxes[instance_id][:4],
-            'area': int(bboxes[instance_id][2] * bboxes[instance_id][3]),
+            'bbox': bina_bbox.tolist(),
+            'area': bina_area,
             'category_id': bboxes[instance_id][-2],
             'id': instance_start_id
         }
