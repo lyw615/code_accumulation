@@ -41,6 +41,14 @@ class MyEncoder(json.JSONEncoder):
 json_path = r'/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/hrsc605.json'
 coco = COCO(json_path)
 txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/hrsc605.txt"
+
+im_start_ind = 1
+instance_start_id = 1
+image_out_dir = "/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/new_imgs"
+os.makedirs(image_out_dir, exist_ok=True)
+copy_num = 33
+long_class_id = 12
+
 with open(txt_path, 'r') as f:
     txt_indexs = f.readlines()
 txt_indexs = [int(x.strip('\n')) for x in txt_indexs]
@@ -60,17 +68,10 @@ data = CocoDetectionCP(
     r'/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Images', json_path, transform
 )
 
-im_start_ind = 1
-instance_start_id = 1
-image_out_dir = "/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/new_imgs"
-os.makedirs(image_out_dir, exist_ok=True)
-
 json_save_path = os.path.join(os.path.dirname(json_path), 'new_%s' % os.path.basename(json_path))
 image_list = []
 ann_list = []
 
-copy_num = 33
-long_class_id = 12
 catIds = coco.getCatIds()
 for n in tqdm(range(copy_num)):
 
