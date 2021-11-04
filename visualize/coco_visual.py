@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(file_path, "..", "..", "..")))
 import numpy as np
 from code_aculat.visualize.visual_base import show_rotated_bbox_from_txt
 from matplotlib import pyplot as plt
+from pycocotools import mask as maskUtils
 
 
 def cocotools_visual():
@@ -31,7 +32,52 @@ def cocotools_visual():
         coco.showAnns(anns, draw_bbox=True)
 
         plt.show()
+
+        # draw_ann_masks(anns, img['height'], img['width'])     #用于检查mask
+
         # plt.savefig("%s/%s"%(plt_save_dir,file_name.split('.')[0]+'.png'))
+
+
+def draw_ann_masks(anns, height, width):
+    """
+    Convert annotation which can be polygons, uncompressed RLE to RLE.
+    return annotation's segmentation to masks
+    """
+    mask_zero = np.zeros(shape=(height, width))
+    for ann in anns:
+        mask = annToMask(ann, height, width)
+        mask_zero += mask
+    plt.imshow(mask_zero)
+    plt.show()
+
+
+def annToRLE(ann, height, width):
+    """
+        Convert annotation which can be polygons, uncompressed RLE to RLE.
+        :return: binary mask (numpy 2D array)
+    """
+    segm = ann['segmentation']
+    if type(segm) == list:
+        rles = maskUtils.frPyObjects(segm, height, width)
+        rle = maskUtils.merge(rles)
+    elif type(segm['counts']) == list:
+        # uncompressed RLE
+        rle = maskUtils.frPyObjects(segm, height, width)
+    else:
+        # RLE
+        rle = ann['segmentation']
+    return rle
+
+
+def annToMask(ann, height, width):
+    """
+        Convert annotation which can be polygons, uncompressed RLE, or RLE to
+        binary mask.
+        :return: binary mask (numpy 2D array)
+    """
+    rle = annToRLE(ann, height, width)
+    m = maskUtils.decode(rle)
+    return m
 
 
 def draw_rotated_visual():

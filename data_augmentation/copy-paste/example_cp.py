@@ -69,7 +69,7 @@ json_save_path = os.path.join(os.path.dirname(json_path), 'new_%s' % os.path.bas
 image_list = []
 ann_list = []
 
-copy_num = 25
+copy_num = 33
 long_class_id = 12
 catIds = coco.getCatIds()
 for n in tqdm(range(copy_num)):
@@ -109,7 +109,7 @@ for n in tqdm(range(copy_num)):
     from skimage import measure
 
     for instance_id in range(len(bboxes)):
-        contours = measure.find_contours(masks[instance_id], 0.5)
+        contours = measure.find_contours(masks[instance_id], 0.5)  # must use np.flip with this method
         fortran_bina = np.asfortranarray(masks[instance_id])
         encoded_bina = maskUtils.encode(fortran_bina)
         bina_area = int(maskUtils.area(encoded_bina))  # more accuracy
@@ -120,7 +120,7 @@ for n in tqdm(range(copy_num)):
             for contour in contours:
                 if len(contour) < 50:
                     continue
-                contour = np.flip(contour, axis=1)  # 为了让坐标排列顺序由y,x,y,x变成x,y,x,y
+                contour = np.flip(contour, axis=1)
                 polygons.append(contour.ravel().tolist())
 
             mask_row, mask_col = masks[instance_id].shape[:2]
@@ -128,11 +128,11 @@ for n in tqdm(range(copy_num)):
             segmentation = maskUtils.merge(rles)
 
             # #convert rle to bina-mask
-            # conv_mask=maskUtils.decode(segmentation)    #因为之前flip,所以转成bina-mask后也要flip
+            # conv_mask=maskUtils.decode(segmentation)
             # show_two_image(masks[instance_id],conv_mask)
         else:
             try:
-                contours = np.flip(contours[0], axis=1)  # must be contours[0]
+                contours = np.flip(contours[0], axis=1)  # must be contours[0], 为了让坐标排列顺序由y,x,y,x变成x,y,x,y
             except Exception as e:
                 show_two_image(masks[instance_id], masks[instance_id])
                 raise e
