@@ -170,7 +170,7 @@ def check_annos(json_path):
                 raise ("bbox filed value error")
 
 
-def analyse_num_each_class(json_path):
+def analyse_num_each_class(json_path,show=True):
     jf = json.load(open(json_path, 'r'))
 
     obs_dict = {}
@@ -178,8 +178,34 @@ def analyse_num_each_class(json_path):
         if ann['category_id'] not in obs_dict.keys():
             obs_dict[ann['category_id']] = 0
         obs_dict[ann['category_id']] += 1
+    print(obs_dict)
+    if show:
+        show_bar(obs_dict, title="ob_num_each_class")
+    return obs_dict
 
-    show_bar(obs_dict, title="ob_num_each_class")
+def checkout_iterstrat_split(json_path,split_folds):
+    "测试生成的多折数据与划分前实例数一致"
+    total_obs_dict=analyse_num_each_class(json_path,False)
+
+    fold_error_dict={}
+    for dir in os.listdir(split_folds):
+        fold_path=os.path.join(split_folds,dir)
+        train_json=os.path.join(fold_path,'train.json')
+        test_json=os.path.join(fold_path,'test.json')
+
+        train_obs_dict=analyse_num_each_class(train_json,False)
+        test_obs_dict=analyse_num_each_class(test_json,False)
+
+        error_num=0
+        for key in total_obs_dict.keys():
+            try:
+                if total_obs_dict[key]!=train_obs_dict[key]+test_obs_dict[key]:
+                    error_num+=1
+            except Exception as e:
+                error_num += 1
+        fold_error_dict[dir]=error_num
+    print(fold_error_dict)
+
 
 
 def show_bar(key_num_dic, title=None):
@@ -220,3 +246,18 @@ def stastic_ann_per_image(json_path):
         stastic_num[value] += 1
 
     show_bar(stastic_num, title="ob_num_per_image")
+
+def check_empty_coco(json_path):
+    valid_imgids=[]
+    with open(json_path,'r') as f:
+        jf=json.load(f)
+
+    for ann in jf['annotations']:
+        if ann['image_id'] not in valid_imgids:
+            valid_imgids.append(ann['image_id'])
+
+    empty_imgids=[]
+    for img in jf['images']:
+        if img['id'] not in valid_imgids:
+            empty_imgids.append(img['id'])
+    print('empty num  is {} ,image ids  {}'.format(len(empty_imgids),empty_imgids))

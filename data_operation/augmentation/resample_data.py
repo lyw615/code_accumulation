@@ -30,25 +30,26 @@ def stastic_single_class_images(json_path, cate_id):
             only_cate_imgs.append(key)
             only_imgs_instance_num += len(value)
 
-    # print(len(only_cate_imgs),only_imgs_instance_num)
+    print(len(only_cate_imgs), only_imgs_instance_num)
     return only_cate_imgs
 
 
 def down_sample_single_class():
-    json_path = r"H:\resample_data\104_tv39_hrsc_raw_trans_copy.json"
+    json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/99_tv37_hrsc605.json"
     # json_path=r"H:\bdc10020-7112-468b-801e-bbbc210568f2\train_val\train.json"
-    new_json_path = r"H:\resample_data\12_downsample.json"
+    new_json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/99_tv37_hrsc605_12_downsample.json"
 
     cate_id = 12  # 降采样类别id
-    save_portion = 0.7  # 降采样比例
+    drop_portion = 1  # 降采样比例
 
     with open(json_path, 'r') as f:
         jf = json.load(f)
     image_ids = stastic_single_class_images(json_path, cate_id)
 
-    saved = image_ids[:int(len(image_ids) * save_portion)]
+    drop_imgids = image_ids[:int(len(image_ids) * drop_portion)]
 
-    create_new_json_from_imageid(saved, jf, new_json_path)
+    # create_new_json_from_imageid(saved, jf, new_json_path)
+    drop_image_and_save_json(drop_imgids, jf, new_json_path)
 
 
 def create_new_json_from_imageid(image_id, jf, new_json_path):
@@ -92,13 +93,45 @@ def create_new_json_from_imageid(image_id, jf, new_json_path):
     json.dump(new_json, open(new_json_path, 'w'))
 
 
+def drop_image_and_save_json(drop_imgids, jf, new_json_path):
+    new_images = []
+    new_anns = []
+    new_cate = []
+    for img in jf['images']:
+        if img['id'] not in drop_imgids:
+            new_images.append(img)
+
+    for ann in jf['annotations']:
+        if ann['image_id'] not in drop_imgids:
+            new_anns.append(ann)
+
+    old_imgid2new_dic = {}
+    for img, new_id in zip(new_images, range(1, len(new_images) + 1)):
+        old_imgid2new_dic[img['id']] = new_id
+        img['id'] = new_id
+
+    cate_ids = []
+    for ann, ann_id in zip(new_anns, range(1, len(new_anns) + 1)):
+        ann['image_id'] = old_imgid2new_dic[ann['image_id']]
+        ann['id'] = ann_id
+        if ann['category_id'] not in cate_ids:
+            cate_ids.append(ann['category_id'])
+
+    for cate in jf['categories']:
+        if cate['id'] in cate_ids:
+            new_cate.append(cate)
+
+    new_jf = {'images': new_images, 'annotations': new_anns, 'categories': new_cate}
+    json.dump(new_jf, open(new_json_path, 'w'))
+
+
 def resample_single_class():
     json_path = r"H:\resample_data\104_tv39_hrsc_raw_trans_copy.json"
-    json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/hrsc605.json"
-    new_txt_path = os.path.join(json_path.replace('.json', '.txt'))
+    json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/train.json"
 
     cate_id = 18  # 重采样类别id
-
+    new_txt_path = os.path.join(os.path.dirname(json_path),
+                                os.path.basename(json_path).split('.')[0] + "_" + str(cate_id) + '.txt')
     with open(json_path, 'r') as f:
         jf = json.load(f)
 

@@ -38,15 +38,15 @@ class MyEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-json_path = r'/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/hrsc605.json'
+json_path = r'/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/train.json'
 coco = COCO(json_path)
-txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/hrsc605.txt"
+txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/train_18.txt"
 
 im_start_ind = 1
 instance_start_id = 1
-image_out_dir = "/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/new_imgs"
+image_out_dir = "/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/new_imgs_18"
 os.makedirs(image_out_dir, exist_ok=True)
-copy_num = 33
+copy_num = 200
 long_class_id = 12
 
 with open(txt_path, 'r') as f:

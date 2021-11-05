@@ -465,7 +465,7 @@ def copy_paste_class(dataset_class):
 
 def get_paste_index():
     ""
-    txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Json/hrsc605.txt"
+    txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/train_18.txt"
     with open(txt_path, 'r') as f:
         copy_indexs = f.readlines()
     copy_indexs = [int(x.strip('\n')) for x in copy_indexs]
