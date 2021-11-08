@@ -179,7 +179,7 @@ def analyse_obs_per_image(names_resource, xml_dir=None):
         fp.close()
 
     assert len(obs_dict) > 0, "xml文件里没有找到对象信息"
-    "得到不重复的类别名称，并排序"
+    "得到不重复的类别名称"
     unique_name = list(obs_dict.keys())
 
     "得到每类对象的数量"

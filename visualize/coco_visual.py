@@ -11,8 +11,8 @@ from matplotlib import pyplot as plt
 
 
 def cocotools_visual():
-    image_dir = r"/home/data1/competition/data/qzb_test/worldview05m_test/ship_test"
-    anno_json_path = r"/home/data1/yw/data/iobjectspy_out/pred_ship_test_1.json"
+    image_dir = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Images"
+    anno_json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/test_17_13_14_18.json"
     # plt_save_dir="/home/data1/yw/data/iobjectspy_out/coco_visual_show"
     # os.makedirs(plt_save_dir)
     coco = COCO(anno_json_path)
@@ -20,6 +20,8 @@ def cocotools_visual():
     catIds = coco.getCatIds()
 
     for imgId in tqdm(imgIds):
+        if np.random.randint(1, 10) < 6:
+            continue
         img = coco.loadImgs(imgId)[0]
         file_name = img['file_name']
         image_arr = cv2.imdecode(np.fromfile(os.path.join(image_dir, file_name), dtype=np.uint8), flags=1)
@@ -31,6 +33,9 @@ def cocotools_visual():
         coco.showAnns(anns, draw_bbox=True)
 
         plt.show()
+
+        # draw_ann_masks(anns, img['height'], img['width'])     #用于检查mask
+
         # plt.savefig("%s/%s"%(plt_save_dir,file_name.split('.')[0]+'.png'))
 
 
@@ -43,7 +48,8 @@ def draw_rotated_visual():
 
 
 def main():
-    draw_rotated_visual()
+    # draw_rotated_visual()
+    cocotools_visual()
 
 
 main()
