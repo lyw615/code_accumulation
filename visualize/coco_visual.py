@@ -8,12 +8,11 @@ sys.path.append(os.path.abspath(os.path.join(file_path, "..", "..", "..")))
 import numpy as np
 from code_aculat.visualize.visual_base import show_rotated_bbox_from_txt
 from matplotlib import pyplot as plt
-from pycocotools import mask as maskUtils
 
 
 def cocotools_visual():
-    image_dir = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/new_imgs_18"
-    anno_json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/new_train.json"
+    image_dir = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Images"
+    anno_json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/test_17_13_14_18.json"
     # plt_save_dir="/home/data1/yw/data/iobjectspy_out/coco_visual_show"
     # os.makedirs(plt_save_dir)
     coco = COCO(anno_json_path)
@@ -38,48 +37,6 @@ def cocotools_visual():
         # draw_ann_masks(anns, img['height'], img['width'])     #用于检查mask
 
         # plt.savefig("%s/%s"%(plt_save_dir,file_name.split('.')[0]+'.png'))
-
-
-def draw_ann_masks(anns, height, width):
-    """
-    Convert annotation which can be polygons, uncompressed RLE to RLE.
-    return annotation's segmentation to masks
-    """
-    mask_zero = np.zeros(shape=(height, width))
-    for ann in anns:
-        mask = annToMask(ann, height, width)
-        mask_zero += mask
-    plt.imshow(mask_zero)
-    plt.show()
-
-
-def annToRLE(ann, height, width):
-    """
-        Convert annotation which can be polygons, uncompressed RLE to RLE.
-        :return: binary mask (numpy 2D array)
-    """
-    segm = ann['segmentation']
-    if type(segm) == list:
-        rles = maskUtils.frPyObjects(segm, height, width)
-        rle = maskUtils.merge(rles)
-    elif type(segm['counts']) == list:
-        # uncompressed RLE
-        rle = maskUtils.frPyObjects(segm, height, width)
-    else:
-        # RLE
-        rle = ann['segmentation']
-    return rle
-
-
-def annToMask(ann, height, width):
-    """
-        Convert annotation which can be polygons, uncompressed RLE, or RLE to
-        binary mask.
-        :return: binary mask (numpy 2D array)
-    """
-    rle = annToRLE(ann, height, width)
-    m = maskUtils.decode(rle)
-    return m
 
 
 def draw_rotated_visual():

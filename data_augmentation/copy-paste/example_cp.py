@@ -13,6 +13,9 @@ from pycocotools.coco import COCO
 from pycocotools import mask as maskUtils
 from tqdm import tqdm
 
+sys.path.append(os.path.abspath(os.path.join(file_path, "..", "..", "..", "..")))
+from code_aculat.utils.coco_tools import MyEncoder
+
 
 def show_two_image(image1, image2, title=None):
     # 同时可视化两个RGB或者mask
@@ -29,24 +32,17 @@ def show_two_image(image1, image2, title=None):
     plt.show()
 
 
-class MyEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        elif isinstance(obj, bytes):
-            return str(obj, encoding='utf-8');
-        return json.JSONEncoder.default(self, obj)
-
-
-json_path = r'/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/train.json'
+json_path = r'/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/test.json'
 coco = COCO(json_path)
-txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/train_18.txt"
+txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/test_18.txt"
+img_name_start_id = 861  # 避免生成的image重名=img_name_start_id+copy_num  train731
 
+# 这两个可以不改,合并的时候自动更新
 im_start_ind = 1
 instance_start_id = 1
-image_out_dir = "/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/new_imgs_18"
+image_out_dir = os.path.join(os.path.dirname(json_path), "new_imgs")
 os.makedirs(image_out_dir, exist_ok=True)
-copy_num = 200
+copy_num = 20
 long_class_id = 12
 
 with open(txt_path, 'r') as f:
@@ -68,7 +64,7 @@ data = CocoDetectionCP(
     r'/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/Images', json_path, transform
 )
 
-json_save_path = os.path.join(os.path.dirname(json_path), 'new_%s' % os.path.basename(json_path))
+json_save_path = os.path.join(os.path.dirname(json_path), "new_%s.json" % os.path.basename(txt_path).split('.')[0])
 image_list = []
 ann_list = []
 
@@ -100,10 +96,13 @@ for n in tqdm(range(copy_num)):
     bboxes = img_data['bboxes']
 
     # 将这些增强后的结果存入新的json
-    new_image_name = "cp_%d.jpg" % (im_start_ind + n)
+    new_image_name = "cp_%d.jpg" % (img_name_start_id + n)
     # cv2.imencode only operates on bgr format image
-    cv2.imencode('.%s' % new_image_name.split('.')[-1], image[..., ::-1])[1].tofile(
-        os.path.join(image_out_dir, new_image_name))
+    new_image_save_path = os.path.join(image_out_dir, new_image_name)
+    assert not os.path.exists(new_image_save_path)
+
+    cv2.imencode('.%s' % new_image_name.split('.')[-1], image[..., ::-1])[1].tofile(new_image_save_path
+                                                                                    )
 
     image_list.append(
         {'height': image.shape[0], 'width': image.shape[1], 'id': im_start_ind + n, 'file_name': new_image_name})

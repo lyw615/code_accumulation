@@ -324,7 +324,7 @@ def checkout_paste_bbox(row, column, paste_img_data):
     bboxes = np.array(paste_img_data['bboxes'], dtype=np.int)
     cate_ids, indexs = bboxes[:, -2], bboxes[:, -1]
 
-    target_catid = [13, 14, 17, 18, 19]
+    target_catid = [13, 14, 17, 16, 18, 19]
 
     save_indexs = []
     for cat, ind in zip(cate_ids, indexs):
@@ -465,7 +465,7 @@ def copy_paste_class(dataset_class):
 
 def get_paste_index():
     ""
-    txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/train_18.txt"
+    txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/test_18.txt"
     with open(txt_path, 'r') as f:
         copy_indexs = f.readlines()
     copy_indexs = [int(x.strip('\n')) for x in copy_indexs]

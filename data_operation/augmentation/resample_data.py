@@ -127,27 +127,28 @@ def drop_image_and_save_json(drop_imgids, jf, new_json_path):
 
 def resample_single_class():
     json_path = r"H:\resample_data\104_tv39_hrsc_raw_trans_copy.json"
-    json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/train.json"
+    json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/test.json"
+    cate_ids = [13, 14, 16, 17, 18]  # 重采样类别id
+    for cate_id in cate_ids:
 
-    cate_id = 18  # 重采样类别id
-    new_txt_path = os.path.join(os.path.dirname(json_path),
-                                os.path.basename(json_path).split('.')[0] + "_" + str(cate_id) + '.txt')
-    with open(json_path, 'r') as f:
-        jf = json.load(f)
+        new_txt_path = os.path.join(os.path.dirname(json_path),
+                                    os.path.basename(json_path).split('.')[0] + "_" + str(cate_id) + '.txt')
+        with open(json_path, 'r') as f:
+            jf = json.load(f)
 
-    image_id = []
+        image_id = []
 
-    for ann in jf['annotations']:
-        if ann['category_id'] == cate_id:
-            if ann['image_id'] not in image_id:
-                image_id.append(ann['image_id'])
+        for ann in jf['annotations']:
+            if ann['category_id'] == cate_id:
+                if ann['image_id'] not in image_id:
+                    image_id.append(ann['image_id'])
 
-    # 把带有这类目标的image_id都存到另一个txt里面，然后做copy-paste,得到的数据都存在另一个json里
-    with open(new_txt_path, 'w') as f:
-        for id in image_id:
-            f.write("%d\n" % id)
+        # 把带有这类目标的image_id都存到另一个txt里面，然后做copy-paste,得到的数据都存在另一个json里
+        with open(new_txt_path, 'w') as f:
+            for id in image_id:
+                f.write("%d\n" % id)
 
-    # create_new_json_from_imageid(image_id, jf, new_json_path)
+        # create_new_json_from_imageid(image_id, jf, new_json_path)
 
 
 def resample_aug():
