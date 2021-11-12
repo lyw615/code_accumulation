@@ -3,14 +3,14 @@ import os
 
 # jf_base = json.load(open("/home/data1/yw/copy_paste_empty/500_aug/only_raw1.json", "r"))  # bigger json file
 jf_base = json.load(
-    open("/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/train_13_18_14_17_16.json",
+    open("/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/only_instance_for_12_downsample.json",
          "r"))  # bigger json file
 
 # jf_add = json.load(open("/home/lyw/train.json", "r"))
 jf_add = json.load(
-    open("/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/empty/annotations/new_train.json", "r"))
+    open("/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/only_instance_for_12_downsample.json", "r"))
 
-out_json_path = "/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/train_13_18_14_17_16_bg57.json"
+out_json_path = "/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/train_13_18_14_17_16_bg57_12down.json"
 
 # process image merge
 base_images = jf_base['images']
