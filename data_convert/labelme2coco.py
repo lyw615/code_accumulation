@@ -213,9 +213,11 @@ def convert(labelme_json_dir, outdir, fix_categories2id, portion=1, split_source
 
 def base_func():
     fix_categories2id = {"1": 1, "2": 2, "15": 3, "21": 4, "22": 5, "23": 6}  # 每次都要硬编码这个类别和id的对应关系，避免训练集和验证集的不一样
+
     fix_categories2id = {"14": 14}  # 每次都要硬编码这个类别和id的对应关系，避免训练集和验证集的不一样
     fix_categories2id = {"10": 10, "11": 11, "12": 12, "13": 13, "14": 14, "15": 15, "16": 16, "17": 17, "18": 18,
                          "19": 19}
+
     fix_categories2id = {"1": 10, "2": 11, "21": 12,"22": 12,"23": 12, "13": 13, "14": 14, "15": 15, "16": 16, "17": 17, "18": 18,
                          "19": 19}
 
@@ -225,6 +227,7 @@ def base_func():
     suffix = '.tif'
     labelme_json_dir = r"H:\ship_download\mask"
     outdir = r"H:\ship_download"
+
     # csv_dir = r"E:\k-fold-fine\fold_v1"
     os.makedirs(outdir, exist_ok=True)
     convert(labelme_json_dir, outdir, fix_categories2id, split_source=None, suffix=suffix)

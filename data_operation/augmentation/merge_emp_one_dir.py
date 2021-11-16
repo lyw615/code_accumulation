@@ -46,7 +46,7 @@ def get_annos_from_mask(mask_path, image_id, cate_id, instance_id):
             "area": int(w * h),
             "iscrowd": 0,
             "image_id": image_id,
-            "bbox": [x, y, x + w, y + h],
+            "bbox": [x, y, w,  h],
             "category_id": cate_id,
             "id": instance_id
         }
@@ -59,9 +59,9 @@ def get_annos_from_mask(mask_path, image_id, cate_id, instance_id):
 
 
 # 自成一个coco json，然后合并两个coco
-input_dir = r"/home/data1/yw/copy_paste_empty/500_aug/out_paste"
-out_img_dir = r"/home/data1/yw/copy_paste_empty/500_aug/out_toge"
-out_coco_path = r"/home/data1/yw/copy_paste_empty/500_aug/outcoco.json"
+input_dir = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/add_13_14"
+out_img_dir = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/add_13_14_img"
+out_coco_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/add_13_14.json"
 os.makedirs(out_img_dir, exist_ok=True)
 
 class_ids = {}

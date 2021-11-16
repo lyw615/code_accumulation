@@ -2,12 +2,15 @@ import json
 import os
 
 # jf_base = json.load(open("/home/data1/yw/copy_paste_empty/500_aug/only_raw1.json", "r"))  # bigger json file
-jf_base = json.load(open("/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv/Json/104.json", "r"))  # bigger json file
+jf_base = json.load(
+    open("/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/only_instance_for_12_downsample.json",
+         "r"))  # bigger json file
 
 # jf_add = json.load(open("/home/lyw/train.json", "r"))
-jf_add = json.load(open("/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv/Json/tv39.json", "r"))
+jf_add = json.load(
+    open("/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/only_instance_for_12_downsample.json", "r"))
 
-out_json_path = "/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv/104_tv39.json"
+out_json_path = "/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/train_13_18_14_17_16_bg57_12down.json"
 
 # process image merge
 base_images = jf_base['images']
@@ -41,8 +44,6 @@ for key, value in new_categories_dic.items():
 # process objs merge
 base_annos = jf_base["annotations"]
 add_annos = jf_add["annotations"]
-
-
 
 for anno in add_annos:
     anno['id'] += start_obj_id

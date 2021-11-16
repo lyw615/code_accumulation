@@ -1,4 +1,7 @@
-import os
+import os, sys
+
+file_path = os.path.abspath(__file__)
+sys.path.append(os.path.abspath(os.path.dirname(file_path)))
 import cv2
 from torchvision.datasets import CocoDetection
 from copy_paste import copy_paste_class
@@ -56,13 +59,18 @@ class CocoDetectionCP(CocoDetection):
 
     def load_example(self, index):
         import numpy as np
-        img_id = self.ids[index]
+
+        img_info = self.coco.loadImgs(index)[0]
+        if img_info['id'] != index:  # 判断index和image_id是否一致
+            raise ("error index {} with image_id {}".format(index, img_info['id']))
+
+        img_id = index
         ann_ids = self.coco.getAnnIds(imgIds=img_id)
         target = self.coco.loadAnns(ann_ids)
 
         path = self.coco.loadImgs(img_id)[0]['file_name']
-        print(path)
-        image = cv2.imdecode(np.fromfile(os.path.join(self.root, path), dtype=np.uint8), flags=-1)
+        # print(index,path)
+        image = cv2.imdecode(np.fromfile(os.path.join(self.root, path), dtype=np.uint8), flags=1)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         # convert all of the target segmentations to masks

@@ -11,6 +11,11 @@ import pandas as pd
 sys.path.append("/home/data1/yw/competetion_tools/iterative-stratification")
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 
+"专门用于调用处理coco数据相关的脚本"
+file_path = os.path.abspath(__file__)
+sys.path.append(os.path.abspath(os.path.join(file_path, "..", "..", "..")))
+from code_aculat.data_analyse.data_analyse_coco import checkout_iterstrat_split
+
 
 def analyze_xml(file_name, max_col):
     '''
@@ -278,9 +283,7 @@ def split_train_val(json_path, folds_dir):
     img_id2filename = {}
     for img in images:
         img_id2filename[img['id']] = img['file_name']
-        suffix = img['file_name']
 
-    suffix = suffix.split(".")[-1]
     imgid2clsid = {}
     for anno in jf['annotations']:
         im_name = img_id2filename[anno['image_id']]
@@ -315,40 +318,40 @@ def split_train_val(json_path, folds_dir):
         X_train, X_test = X[train_index], X[test_index]
         # Y_train, Y_test = Y[train_index], Y[test_index]
 
-        train_img_names = ["%s.%s" % (x[0], suffix) for x in X_train]
-        test_img_names = ["%s.%s" % (x[0], suffix) for x in X_test]
+        train_img_names = ["%s" % x[0] for x in X_train]
+        test_img_names = ["%s" % x[0] for x in X_test]
 
         train_images, test_images = [], []
         for x in images:
-            if x["file_name"] in train_img_names:
+            if x["file_name"].split('.')[0] in train_img_names:
                 train_images.append(x)
-            elif x["file_name"] in test_img_names:
+            elif x["file_name"].split('.')[0] in test_img_names:
                 test_images.append(x)
 
         # updata image id
-        new_train_im_id2new_id = {}
-        new_test_im_id2new_id = {}
+        old_train_im_id2new_id = {}
+        old_test_im_id2new_id = {}
         for i, im in enumerate(train_images):
             old_im_id = im["id"]
             new_im_id = i + 1
-            new_train_im_id2new_id[old_im_id] = new_im_id
+            old_train_im_id2new_id[old_im_id] = new_im_id
             train_images[i]['id'] = new_im_id
 
         for i, im in enumerate(test_images):
             old_im_id = im["id"]
             new_im_id = i + 1
-            new_test_im_id2new_id[old_im_id] = new_im_id
+            old_test_im_id2new_id[old_im_id] = new_im_id
             test_images[i]['id'] = new_im_id
 
         train_annos, test_annos = [], []
 
         for anno in jf['annotations']:
-            if anno['image_id'] in new_train_im_id2new_id.keys():
-                anno['image_id'] = new_train_im_id2new_id[anno['image_id']]
+            if anno['image_id'] in old_train_im_id2new_id.keys():
+                anno['image_id'] = old_train_im_id2new_id[anno['image_id']]
                 anno['id'] = len(train_annos) + 1
                 train_annos.append(anno)
-            elif anno['image_id'] in new_test_im_id2new_id.keys():
-                anno['image_id'] = new_test_im_id2new_id[anno['image_id']]
+            elif anno['image_id'] in old_test_im_id2new_id.keys():
+                anno['image_id'] = old_test_im_id2new_id[anno['image_id']]
                 anno['id'] = len(test_annos) + 1
                 test_annos.append(anno)
 
@@ -411,10 +414,10 @@ if __name__ == '__main__':
     # class_name_dict={"holothurian":0 ,"echinus": 1,"scallop": 2,"starfish": 3,"waterweeds": 4,}
     # class_name_dict = {"echinus": 1, "scallop": 2, "starfish": 3, "holothurian": 4, }
 
-    coco_path = "/home/data1/yw/copy_paste_empty/500_aug/merged.json"
+    coco_path = "/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/99_tv37_hrsc605_12_downsample.json"
     # coco_path="/home/data1/yw/copy_paste_empty/merged.json"
-    folds_dir = "/home/data1/yw/copy_paste_empty/500_aug/big_coco_split"
+    folds_dir = "/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data"
     # dirty_txt = r"/home/data1/yw/github_projects/personal_github/code_aculat/data_operation/image_pre_none.txt"
     split_train_val(coco_path, folds_dir)
-
+    checkout_iterstrat_split(coco_path, folds_dir)
     # test_split_balance()
