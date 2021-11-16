@@ -34,7 +34,7 @@ def show_two_image(image1, image2, title=None):
 
 json_path = r'/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/test.json'
 coco = COCO(json_path)
-txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/test_18.txt"
+txt_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/process/test_18.txt"
 img_name_start_id = 861  # 避免生成的image重名=img_name_start_id+copy_num  train731
 
 # 这两个可以不改,合并的时候自动更新

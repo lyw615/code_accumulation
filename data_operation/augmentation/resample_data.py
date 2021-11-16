@@ -37,7 +37,7 @@ def stastic_single_class_images(json_path, cate_id):
 def down_sample_single_class():
     json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/99_tv37_hrsc605.json"
     # json_path=r"H:\bdc10020-7112-468b-801e-bbbc210568f2\train_val\train.json"
-    new_json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/99_tv37_hrsc605_12_downsample.json"
+    new_json_path = r"/home/data1/yw/copy_paste_empty/500_aug/hrsc_104_tv_raw_trans/train_data/aug_fold_v1/half_12_downsample.json"
 
     cate_id = 12  # 降采样类别id
     drop_portion = 1  # 降采样比例
@@ -46,9 +46,16 @@ def down_sample_single_class():
         jf = json.load(f)
     image_ids = stastic_single_class_images(json_path, cate_id)
 
-    drop_imgids = image_ids[:int(len(image_ids) * drop_portion)]
+    # extract downsample data to json file
+    # ids_index=[x for x in range(len(image_ids))]
+    # np.random.shuffle(ids_index)
+    # save_index=ids_index[:int(len(image_ids) * drop_portion)]
+    # save_imgids=np.array(image_ids)[save_index]
+    #
+    # create_new_json_from_imageid(save_imgids, jf, new_json_path)
 
-    # create_new_json_from_imageid(saved, jf, new_json_path)
+    # create new json file without  downsampled data
+    drop_imgids = image_ids[:int(len(image_ids) * drop_portion)]
     drop_image_and_save_json(drop_imgids, jf, new_json_path)
 
 
@@ -232,8 +239,8 @@ def shift_move():
 
 
 def main():
-    # down_sample_single_class()
-    resample_single_class()
+    down_sample_single_class()
+    # resample_single_class()
     # resample_aug()
     # shift_move()
 
