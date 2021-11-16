@@ -46,12 +46,21 @@ class labelme2coco(object):
         self.save_json()
 
     def data_transfer(self):
+        empty_imgs=[]
+        img_id=0 #plus 1 auto
 
         for num, json_file in enumerate(tqdm(self.labelme_json)):
             with open(json_file, 'r') as fp:
                 file_name = os.path.basename(json_file).split('.')[0] + self.suffix
-                data = json.load(fp)  # ¼ÓÔØjsonÎÄ¼þ
-                self.images.append(self.image(data, num, file_name))
+                data = json.load(fp)
+
+
+                if len(data['shapes'])==0:
+                    empty_imgs.append(file_name)
+                    continue
+
+                self.images.append(self.image(data, img_id, file_name))
+
                 for shapes in data['shapes']:
                     label = shapes['label']
 
@@ -65,8 +74,11 @@ class labelme2coco(object):
                     # points.append([points[1][0],points[0][1]])
 
                     points = shapes['points']  # ÕâÀïµÄpointÊÇÓÃrectangle±ê×¢µÃµ½µÄ£¬Ö»ÓÐÁ½¸öµã£¬ÐèÒª×ª³ÉËÄ¸öµã
-                    self.annotations.append(self.annotation(points, label, num))
+                    self.annotations.append(self.annotation(points, label, img_id))
                     self.annID += 1
+                img_id+=1
+
+        print("{} empty images {}".format(len(empty_imgs),empty_imgs))
 
     def image(self, data, num, file_name):
         image = {}
@@ -154,7 +166,7 @@ class labelme2coco(object):
         data_coco['images'] = self.images
 
         for key, value in self.categories.items():
-            categories_list.append({'name': key, 'id': value})
+            categories_list.append({'name': str(value), 'id': value})
 
         data_coco['categories'] = categories_list
         data_coco['annotations'] = self.annotations
@@ -204,9 +216,15 @@ def base_func():
     fix_categories2id = {"14": 14}  # 每次都要硬编码这个类别和id的对应关系，避免训练集和验证集的不一样
     fix_categories2id = {"10": 10, "11": 11, "12": 12, "13": 13, "14": 14, "15": 15, "16": 16, "17": 17, "18": 18,
                          "19": 19}
-    suffix = '.jpg'
-    labelme_json_dir = r"H:\bdc10020-7112-468b-801e-bbbc210568f2\train_val\mask"
-    outdir = r"H:\bdc10020-7112-468b-801e-bbbc210568f2\train_val"
+    fix_categories2id = {"1": 10, "2": 11, "21": 12,"22": 12,"23": 12, "13": 13, "14": 14, "15": 15, "16": 16, "17": 17, "18": 18,
+                         "19": 19}
+
+    fix_categories2id = {"10": 10, "11": 11, "12": 12,"13": 13, "14": 14, "15": 15, "16": 16,
+                         "17": 17, "18": 18,
+                         "19": 19}
+    suffix = '.tif'
+    labelme_json_dir = r"H:\ship_download\mask"
+    outdir = r"H:\ship_download"
     # csv_dir = r"E:\k-fold-fine\fold_v1"
     os.makedirs(outdir, exist_ok=True)
     convert(labelme_json_dir, outdir, fix_categories2id, split_source=None, suffix=suffix)
